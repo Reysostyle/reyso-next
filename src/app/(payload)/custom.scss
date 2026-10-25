@@ -60,32 +60,301 @@
   }
 
   // Sidebar
+  @keyframes reyso-nav-in {
+    from {
+      opacity: 0;
+      transform: translateX(12px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
   .nav {
-    background: var(--reyso-green);
+    background:
+      radial-gradient(140% 60% at 100% 0%, rgba(173, 145, 85, 0.18) 0%, transparent 60%),
+      linear-gradient(180deg, #1c4436 0%, #13342a 100%);
     border-inline-end: none;
+  }
+  .nav__wrap {
+    gap: 2px;
+    padding-top: 8px;
   }
   .nav,
   .nav a,
-  .nav button,
-  .nav .nav-group__toggle {
+  .nav button {
     color: #f7f3ea;
   }
-  .nav .nav-group__label,
-  .nav .nav-group__toggle {
-    color: var(--reyso-gold);
+  .reyso-nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 4px 22px;
+    margin-bottom: 14px;
+    border-bottom: 1px solid rgba(231, 220, 196, 0.12);
+    text-decoration: none;
+    animation: reyso-nav-in 0.5s ease-out both;
   }
-  .nav a:hover,
-  .nav .nav__link:hover {
+  .reyso-nav-brand img {
+    width: 34px;
+    height: auto;
+    padding: 6px;
+    border-radius: 12px;
+    background: #f7f3ea;
+    box-sizing: content-box;
+    transition: transform 0.4s cubic-bezier(0.3, 1.6, 0.5, 1);
+  }
+  .reyso-nav-brand:hover img {
+    transform: rotate(-8deg) scale(1.06);
+  }
+  .reyso-nav-brand span {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.4;
+  }
+  .reyso-nav-brand b {
     color: #fff;
-    background: rgba(255, 255, 255, 0.08);
+    font-size: 17px;
+    letter-spacing: 0.04em;
+  }
+  .reyso-nav-brand small {
+    color: var(--reyso-gold);
+    font-size: 12px;
+  }
+
+  // Links: icon, roomier type, hover slide, gold active pill
+  .nav .nav__link {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 11px 14px;
+    margin: 2px 0;
+    text-decoration: none;
+    border-radius: 12px;
+    font-size: 14.5px;
+    font-weight: 500;
+    line-height: 1.5;
+    color: rgba(247, 243, 234, 0.82);
+    transition:
+      background 0.25s,
+      color 0.25s,
+      transform 0.25s cubic-bezier(0.2, 0.7, 0.2, 1);
+    animation: reyso-nav-in 0.45s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+  .nav .nav__link::before {
+    content: "";
+    flex: none;
+    width: 20px;
+    height: 20px;
+    background: currentColor;
+    opacity: 0.75;
+    -webkit-mask: var(--reyso-nav-icon) center / contain no-repeat;
+    mask: var(--reyso-nav-icon) center / contain no-repeat;
+    transition:
+      opacity 0.25s,
+      transform 0.3s cubic-bezier(0.3, 1.6, 0.5, 1);
+  }
+  .nav a.nav__link:hover {
+    text-decoration: none;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.07);
+    transform: translateX(-4px);
+  }
+  .nav a.nav__link:hover::before {
+    opacity: 1;
+    transform: scale(1.12);
   }
   .nav .nav__link.active,
-  .nav a.active {
+  .nav .nav__link:has(.nav__link-indicator) {
     color: #fff;
-    background: rgba(173, 145, 85, 0.25);
+    font-weight: 600;
+    background: linear-gradient(90deg, rgba(173, 145, 85, 0.12), rgba(173, 145, 85, 0.32));
+    box-shadow: inset 0 0 0 1px rgba(173, 145, 85, 0.35);
+  }
+  .nav .nav__link.active::before,
+  .nav .nav__link:has(.nav__link-indicator)::before {
+    opacity: 1;
+    background: var(--reyso-gold-soft);
   }
   .nav .nav__link-indicator {
+    position: absolute;
+    inset-inline-start: -4px;
+    top: 50%;
+    width: 4px;
+    height: 22px;
+    margin-top: -11px;
+    border-radius: 4px;
     background: var(--reyso-gold);
+  }
+  .nav .nav__link-label {
+    text-decoration: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  // Groups
+  .nav .nav-group {
+    margin-top: 18px;
+  }
+  .nav .nav-group__toggle {
+    padding: 4px 14px 8px;
+    color: var(--reyso-gold);
+  }
+  .nav .nav-group__label {
+    color: var(--reyso-gold);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+  }
+  .nav .nav-group__toggle:hover .nav-group__label {
+    color: var(--reyso-gold-soft);
+  }
+  .nav .nav-group__indicator svg {
+    transition: transform 0.3s;
+  }
+  .nav .nav-group__content {
+    display: flex;
+    flex-direction: column;
+  }
+  .nav .nav__controls {
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(231, 220, 196, 0.12);
+  }
+  .nav .nav__log-out {
+    display: inline-grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    transition: background 0.25s;
+  }
+  .nav .nav__log-out:hover {
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  // Staggered entrance: dashboard first, then each group's links in turn
+  #nav-dashboard {
+    animation-delay: 60ms;
+  }
+  .nav-group:nth-of-type(1) .nav__link:nth-child(1) {
+    animation-delay: 200ms;
+  }
+  .nav-group:nth-of-type(1) .nav__link:nth-child(2) {
+    animation-delay: 235ms;
+  }
+  .nav-group:nth-of-type(1) .nav__link:nth-child(3) {
+    animation-delay: 270ms;
+  }
+  .nav-group:nth-of-type(1) .nav__link:nth-child(4) {
+    animation-delay: 305ms;
+  }
+  .nav-group:nth-of-type(1) .nav__link:nth-child(5) {
+    animation-delay: 340ms;
+  }
+  .nav-group:nth-of-type(1) .nav__link:nth-child(6) {
+    animation-delay: 375ms;
+  }
+  .nav-group:nth-of-type(1) .nav__link:nth-child(7) {
+    animation-delay: 410ms;
+  }
+  .nav-group:nth-of-type(2) .nav__link:nth-child(1) {
+    animation-delay: 305ms;
+  }
+  .nav-group:nth-of-type(2) .nav__link:nth-child(2) {
+    animation-delay: 340ms;
+  }
+  .nav-group:nth-of-type(2) .nav__link:nth-child(3) {
+    animation-delay: 375ms;
+  }
+  .nav-group:nth-of-type(2) .nav__link:nth-child(4) {
+    animation-delay: 410ms;
+  }
+  .nav-group:nth-of-type(2) .nav__link:nth-child(5) {
+    animation-delay: 445ms;
+  }
+  .nav-group:nth-of-type(2) .nav__link:nth-child(6) {
+    animation-delay: 480ms;
+  }
+  .nav-group:nth-of-type(2) .nav__link:nth-child(7) {
+    animation-delay: 515ms;
+  }
+  .nav-group:nth-of-type(3) .nav__link:nth-child(1) {
+    animation-delay: 410ms;
+  }
+  .nav-group:nth-of-type(3) .nav__link:nth-child(2) {
+    animation-delay: 445ms;
+  }
+  .nav-group:nth-of-type(3) .nav__link:nth-child(3) {
+    animation-delay: 480ms;
+  }
+  .nav-group:nth-of-type(3) .nav__link:nth-child(4) {
+    animation-delay: 515ms;
+  }
+  .nav-group:nth-of-type(3) .nav__link:nth-child(5) {
+    animation-delay: 550ms;
+  }
+  .nav-group:nth-of-type(3) .nav__link:nth-child(6) {
+    animation-delay: 585ms;
+  }
+  .nav-group:nth-of-type(3) .nav__link:nth-child(7) {
+    animation-delay: 620ms;
+  }
+  #nav-dashboard {
+    --reyso-nav-icon: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Crect x=%223%22 y=%223%22 width=%227%22 height=%229%22 rx=%221.5%22/%3E%3Crect x=%2214%22 y=%223%22 width=%227%22 height=%225%22 rx=%221.5%22/%3E%3Crect x=%2214%22 y=%2212%22 width=%227%22 height=%229%22 rx=%221.5%22/%3E%3Crect x=%223%22 y=%2216%22 width=%227%22 height=%225%22 rx=%221.5%22/%3E%3C/svg%3E");
+  }
+  #nav-orders {
+    --reyso-nav-icon: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M6 7h12l-1 13H7L6 7Z%22/%3E%3Cpath d=%22M9 7a3 3 0 0 1 6 0%22/%3E%3C/svg%3E");
+  }
+  #nav-products {
+    --reyso-nav-icon: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M8 3 4 6l2 4 2-1v12h8V9l2 1 2-4-4-3c0 2-1.8 3-4 3S8 5 8 3Z%22/%3E%3C/svg%3E");
+  }
+  #nav-categories {
+    --reyso-nav-icon: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z%22/%3E%3C/svg%3E");
+  }
+  #nav-media {
+    --reyso-nav-icon: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Crect x=%223%22 y=%224%22 width=%2218%22 height=%2216%22 rx=%222%22/%3E%3Ccircle cx=%229%22 cy=%2210%22 r=%222%22/%3E%3Cpath d=%22m21 16-5-5-9 9%22/%3E%3C/svg%3E");
+  }
+  #nav-customers {
+    --reyso-nav-icon: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Ccircle cx=%229%22 cy=%228%22 r=%223.5%22/%3E%3Cpath d=%22M2.5 20a6.5 6.5 0 0 1 13 0%22/%3E%3Cpath d=%22M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6 6 0 0 1 3.5 6%22/%3E%3C/svg%3E");
+  }
+  #nav-discount-codes {
+    --reyso-nav-icon: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M3 8a2 2 0 0 0 2-2h14a2 2 0 0 0 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 0-2 2H5a2 2 0 0 0-2-2v-2a2 2 0 0 0 0-4V8Z%22/%3E%3Cpath d=%22m9 15 6-6M9.5 9.5h.01M14.5 14.5h.01%22/%3E%3C/svg%3E");
+  }
+  #nav-lessons {
+    --reyso-nav-icon: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M4 5a2 2 0 0 1 2-2h13v15H6a2 2 0 0 0-2 2V5Z%22/%3E%3Cpath d=%22M4 20a2 2 0 0 0 2 2h13v-4%22/%3E%3C/svg%3E");
+  }
+  #nav-global-home {
+    --reyso-nav-icon: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22m3 11 9-8 9 8%22/%3E%3Cpath d=%22M5 10v10h14V10%22/%3E%3Cpath d=%22M10 20v-6h4v6%22/%3E%3C/svg%3E");
+  }
+  #nav-users {
+    --reyso-nav-icon: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22black%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M12 3 4 6v6c0 4.5 3.4 8.2 8 9 4.6-.8 8-4.5 8-9V6l-8-3Z%22/%3E%3Cpath d=%22m9 12 2 2 4-4%22/%3E%3C/svg%3E");
+  }
+  // On phones the open sidebar covers the page instead of pushing it
+  // sideways (in RTL that pushed the menu itself off screen).
+  @media (max-width: 768px) {
+    .template-default--nav-hydrated.template-default--nav-open {
+      grid-template-columns: 0 auto;
+    }
+    .template-default--nav-open .nav {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100dvh;
+      z-index: 50;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nav .nav__link,
+    .reyso-nav-brand {
+      animation: none;
+      transition: none;
+    }
   }
 
   // Logos
@@ -249,16 +518,6 @@
     text-decoration: none;
     font-size: 13px;
     direction: ltr;
-  }
-
-  // Sidebar "داشبورد" link (src/components/admin/NavDashboard.tsx)
-  .reyso-nav-dash {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .reyso-nav-dash-link {
-    margin-bottom: 8px;
   }
 
   // Dashboard (src/components/admin/Dashboard.tsx)
