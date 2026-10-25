@@ -21,3 +21,7 @@ npm run build && npm start
 Backend endpoints and contact handles come from environment variables (see `.env.example`). Leaving one empty keeps the old demo behaviour: orders and accounts stay in the visitor's browser, the OTP code is `12345`, the support chat answers with a canned reply.
 
 Before taking real orders, `NEXT_PUBLIC_ORDER_API_URL` and the OTP endpoints must point at a real backend.
+
+## Preview on GitHub Pages
+
+`.github/workflows/pages.yml` publishes a static preview to https://reysostyle.github.io/reyso-next/ on every push to `main` (enable it once under Settings → Pages → Source: GitHub Actions). The preview is a static export (`PAGES_BASE_PATH`), so old `.html` redirects don't apply there and the store runs in demo mode.

@@ -20,10 +20,17 @@ const OLD_PAGES: [string, string][] = [
   ["/terms.html", "/terms"],
 ];
 
-const nextConfig: NextConfig = {
-  async redirects() {
-    return [...OLD_PAGES.map(([source, destination]) => ({ source, destination, permanent: true }))];
-  },
-};
+// PAGES_BASE_PATH is set by the GitHub Pages preview workflow: the site
+// is then exported as static files served from /<repo>, where neither
+// redirects nor src/proxy.ts can run.
+const pagesBasePath = process.env.PAGES_BASE_PATH;
+
+const nextConfig: NextConfig = pagesBasePath
+  ? { output: "export", basePath: pagesBasePath }
+  : {
+      async redirects() {
+        return OLD_PAGES.map(([source, destination]) => ({ source, destination, permanent: true }));
+      },
+    };
 
 export default nextConfig;

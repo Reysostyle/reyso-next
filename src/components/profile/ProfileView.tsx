@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { AddressFields, NAME_PATTERN, focusField, useAddressForm } from "@/components/checkout/AddressFields";
 import { ProductCard } from "@/components/product/ProductCard";
@@ -469,4 +469,11 @@ export function ProfileView({ newOrderId }: { newOrderId: string | null }) {
       </div>
     </section>
   );
+}
+
+export function ProfileFromQuery() {
+  // Kept in state: the URL is cleaned right after, which would
+  // otherwise hide the banner straight away.
+  const [newOrderId] = useState(useSearchParams().get("new_order"));
+  return <ProfileView newOrderId={newOrderId} />;
 }

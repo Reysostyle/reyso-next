@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import { PRODUCTS, getCollectionBySlug } from "@/lib/products";
 import { ProductCard } from "@/components/product/ProductCard";
@@ -234,4 +235,10 @@ export function ShopView({ initialCategory }: { initialCategory?: string }) {
       <RecentlyViewed />
     </>
   );
+}
+
+export function ShopFromQuery() {
+  const category = useSearchParams().get("category") ?? undefined;
+  // key: following another ?category= link resets the filters.
+  return <ShopView key={category ?? ""} initialCategory={category} />;
 }
