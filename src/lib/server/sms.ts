@@ -1,4 +1,5 @@
 import "server-only";
+import { kavenegarLookup } from "./kavenegar";
 
 // How login codes reach the customer:
 // - "kavenegar": real SMS through Kavenegar's verify/lookup API, once
@@ -20,21 +21,6 @@ export async function sendOtpSms(phone: string, code: string): Promise<boolean> 
   const mode = smsMode();
   if (mode === "demo") return true;
   if (mode === "off") return false;
-
-  const key = encodeURIComponent(process.env.KAVENEGAR_API_KEY!);
-  const params = new URLSearchParams({
-    receptor: phone,
-    token: code,
-    template: process.env.KAVENEGAR_OTP_TEMPLATE!,
-  });
-  try {
-    const res = await fetch(`https://api.kavenegar.com/v1/${key}/verify/lookup.json?${params}`, {
-      signal: AbortSignal.timeout(10_000),
-    });
-    if (res.ok) return true;
-    console.error("Kavenegar error", res.status, await res.text().catch(() => ""));
-  } catch (err) {
-    console.error("Kavenegar request failed", err);
-  }
-  return false;
+  const res = await kavenegarLookup(phone, process.env.KAVENEGAR_OTP_TEMPLATE!, { token: code });
+  return res.ok;
 }

@@ -5897,6 +5897,21 @@ body:not(.menu-open) .mobile-menu-links li {
   color: var(--deep-green);
 }
 
+.track-tracking-code a {
+  color: var(--deep-green);
+  font-size: 13px;
+  margin-inline-start: 6px;
+  text-decoration: underline;
+}
+
+.track-step-date {
+  display: block;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-mute);
+  margin-top: 2px;
+}
+
 /* =====================================================
    ADD-TO-CART MODAL (global — shown from cart.js)
 ===================================================== */

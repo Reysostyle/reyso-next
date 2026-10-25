@@ -76,12 +76,17 @@ export interface Config {
     lessons: Lesson;
     users: User;
     'otp-codes': OtpCode;
+    notifications: Notification;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
-  collectionsJoins: {};
+  collectionsJoins: {
+    orders: {
+      notifications: 'notifications';
+    };
+  };
   collectionsSelect: {
     orders: OrdersSelect<false> | OrdersSelect<true>;
     products: ProductsSelect<false> | ProductsSelect<true>;
@@ -92,6 +97,7 @@ export interface Config {
     lessons: LessonsSelect<false> | LessonsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'otp-codes': OtpCodesSelect<false> | OtpCodesSelect<true>;
+    notifications: NotificationsSelect<false> | NotificationsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -142,11 +148,26 @@ export interface UserAuthOperations {
 export interface Order {
   id: number;
   orderNumber: string;
+  /**
+   * با هر تغییر وضعیت، به مشتری پیامک داده می‌شود.
+   */
   status: 'pending_payment' | 'registered' | 'sewing' | 'ready' | 'shipped' | 'cancelled';
   /**
-   * بعد از ارسال وارد کنید تا مشتری در صفحه پیگیری ببیند.
+   * بعد از ارسال وارد کنید؛ مشتری در صفحه پیگیری و پیامک می‌بیند.
    */
   trackingCode?: string | null;
+  statusHistory?:
+    | {
+        status?: ('pending_payment' | 'registered' | 'sewing' | 'ready' | 'shipped' | 'cancelled') | null;
+        at?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  notifications?: {
+    docs?: (number | Notification)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   customer?: (number | null) | Customer;
   customerName: string;
   phone: string;
@@ -181,6 +202,21 @@ export interface Order {
     cardPan?: string | null;
     paidAt?: string | null;
   };
+  createdAt: string;
+  updatedAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "notifications".
+ */
+export interface Notification {
+  id: number;
+  order?: (number | null) | Order;
+  channel: 'sms' | 'telegram';
+  to?: string | null;
+  text: string;
+  result: 'sent' | 'failed' | 'not_configured';
+  error?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -429,6 +465,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'otp-codes';
         value: number | OtpCode;
+      } | null)
+    | ({
+        relationTo: 'notifications';
+        value: number | Notification;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -480,6 +520,14 @@ export interface OrdersSelect<T extends boolean = true> {
   orderNumber?: T;
   status?: T;
   trackingCode?: T;
+  statusHistory?:
+    | T
+    | {
+        status?: T;
+        at?: T;
+        id?: T;
+      };
+  notifications?: T;
   customer?: T;
   customerName?: T;
   phone?: T;
@@ -678,6 +726,20 @@ export interface OtpCodesSelect<T extends boolean = true> {
   used?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "notifications_select".
+ */
+export interface NotificationsSelect<T extends boolean = true> {
+  order?: T;
+  channel?: T;
+  to?: T;
+  text?: T;
+  result?: T;
+  error?: T;
+  createdAt?: T;
+  updatedAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

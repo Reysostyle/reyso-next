@@ -7,7 +7,9 @@ import { useRaw } from "@/lib/local-store";
 import { LAST_ORDER_ID_KEY, lookupOrderLocal, lookupOrderRemote } from "@/lib/orders";
 import { ORDER_STATUS_STEPS, type TrackLookup, stepStates } from "@/lib/order-status";
 
-type Result = { orderId: string; production: string; trackingCode: string };
+type Result = { orderId: string; production: string; trackingCode: string; dates: Record<string, string> };
+
+const stepDate = new Intl.DateTimeFormat("fa-IR", { month: "long", day: "numeric" });
 
 export function TrackOrderView() {
   // Pre-filled with the last order placed on this device, if any.
@@ -42,6 +44,7 @@ export function TrackOrderView() {
       orderId: id,
       production: data.status.production,
       trackingCode: data.status.trackingCode || "",
+      dates: data.dates ?? {},
     });
   }
 
@@ -70,7 +73,7 @@ export function TrackOrderView() {
             پیگیری سفارش
           </button>
         </form>
-        <p className="track-not-configured" id="track-not-configured" hidden={submitted}>
+        <p className="track-not-configured" id="track-not-configured" hidden={submitted || ACCOUNTS_API}>
           این بخش به‌زودی مستقیم به سیستم سفارش‌ها وصل می‌شه. فعلاً برای پیگیری دقیق‌تر از طریق تلگرام باهامون
           در ارتباط باش.
         </p>
@@ -88,12 +91,22 @@ export function TrackOrderView() {
                   <span className="track-step-dot">
                     <i className="ri-check-line"></i>
                   </span>
-                  <span className="track-step-label">{step.label}</span>
+                  <span className="track-step-label">
+                    {step.label}
+                    {states[i] && result.dates[step.key] && (
+                      <small className="track-step-date">
+                        {stepDate.format(new Date(result.dates[step.key]))}
+                      </small>
+                    )}
+                  </span>
                 </div>
               ))}
           </div>
           <p className="track-tracking-code" id="track-code-wrap" hidden={!result?.trackingCode}>
-            کد رهگیری پستی: <strong id="track-code">{result?.trackingCode}</strong>
+            کد رهگیری پستی: <strong id="track-code">{result?.trackingCode}</strong>{" "}
+            <a href="https://tracking.post.ir/" target="_blank" rel="noopener noreferrer">
+              پیگیری در سایت پست
+            </a>
           </p>
         </div>
       </div>
