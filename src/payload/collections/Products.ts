@@ -1,6 +1,11 @@
 import type { CollectionConfig } from "payload";
 import { revalidateHooks } from "../revalidate";
 
+const PRICE_COMPONENTS = {
+  Cell: "/components/admin/PriceCell",
+  afterInput: ["/components/admin/PriceHint"],
+};
+
 const SIZE_OPTIONS = ["36", "38", "40", "42", "44", "46", "48", "فری‌سایز"];
 
 export const Products: CollectionConfig = {
@@ -8,14 +13,27 @@ export const Products: CollectionConfig = {
   labels: { singular: "محصول", plural: "محصولات" },
   admin: {
     useAsTitle: "name",
-    defaultColumns: ["name", "category", "price", "published"],
+    defaultColumns: ["thumb", "name", "category", "price", "published"],
     group: "فروشگاه",
   },
   // Visitors only see published products; staff see everything.
   access: { read: ({ req }) => (req.user ? true : { published: { equals: true } }) },
   hooks: revalidateHooks,
   fields: [
-    { name: "name", label: "نام", type: "text", required: true },
+    {
+      // List-only column with the first photo.
+      name: "thumb",
+      label: "عکس",
+      type: "ui",
+      admin: { components: { Cell: "/components/admin/ThumbCell" } },
+    },
+    {
+      name: "name",
+      label: "نام",
+      type: "text",
+      required: true,
+      admin: { components: { Cell: "/components/admin/NameCell" } },
+    },
     {
       name: "slug",
       label: "شناسه در آدرس (انگلیسی، مثل manteau-abrisham)",
@@ -31,7 +49,7 @@ export const Products: CollectionConfig = {
       label: "نمایش در سایت",
       type: "checkbox",
       defaultValue: true,
-      admin: { position: "sidebar" },
+      admin: { position: "sidebar", components: { Cell: "/components/admin/PublishedCell" } },
     },
     {
       name: "category",
@@ -44,8 +62,21 @@ export const Products: CollectionConfig = {
     {
       type: "row",
       fields: [
-        { name: "price", label: "قیمت (تومان)", type: "number", required: true, min: 0 },
-        { name: "oldPrice", label: "قیمت قبل از تخفیف (تومان)", type: "number", min: 0 },
+        {
+          name: "price",
+          label: "قیمت (تومان)",
+          type: "number",
+          required: true,
+          min: 0,
+          admin: { components: PRICE_COMPONENTS },
+        },
+        {
+          name: "oldPrice",
+          label: "قیمت قبل از تخفیف (تومان)",
+          type: "number",
+          min: 0,
+          admin: { components: PRICE_COMPONENTS },
+        },
       ],
     },
     { name: "description", label: "توضیحات", type: "textarea", required: true },

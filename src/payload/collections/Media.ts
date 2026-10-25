@@ -8,7 +8,8 @@ const dirname = path.dirname(fileURLToPath(import.meta.url));
 export const Media: CollectionConfig = {
   slug: "media",
   labels: { singular: "تصویر", plural: "تصاویر" },
-  admin: { group: "فروشگاه" },
+  // No date columns: Payload shows them in the Gregorian calendar.
+  admin: { group: "فروشگاه", defaultColumns: ["filename", "alt"] },
   access: { read: () => true },
   hooks: revalidateHooks,
   upload: {

@@ -5,7 +5,7 @@ import type { CollectionConfig } from "payload";
 export const Users: CollectionConfig = {
   slug: "users",
   labels: { singular: "مدیر", plural: "مدیران" },
-  admin: { useAsTitle: "email", group: "تنظیمات" },
+  admin: { useAsTitle: "email", defaultColumns: ["email"], group: "تنظیمات" },
   auth: true,
   fields: [{ name: "name", label: "نام", type: "text" }],
 };
