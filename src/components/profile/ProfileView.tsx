@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { AddressFields, NAME_PATTERN, focusField, useAddressForm } from "@/components/checkout/AddressFields";
 import { ProductCard } from "@/components/product/ProductCard";
+import { logOut } from "@/lib/account";
 import { REYSO_CONFIG } from "@/lib/config";
 import {
   type Address,
@@ -15,7 +16,6 @@ import {
   removeAddress,
   saveMockCustomer,
   setDefaultAddress,
-  setVerified,
   useCustomer,
 } from "@/lib/customer";
 import { useRaw } from "@/lib/local-store";
@@ -24,7 +24,7 @@ import { ORDER_STATUS_STEPS, orderStatusIndex, stepStates } from "@/lib/order-st
 import { useCatalog } from "@/components/CatalogProvider";
 import { formatToman } from "@/lib/products";
 import { useHydrated } from "@/lib/use-hydrated";
-import { saveWishlist, useWishlist } from "@/lib/wishlist";
+import { useWishlist } from "@/lib/wishlist";
 
 /* eslint-disable @next/next/no-img-element */
 
@@ -304,11 +304,10 @@ function ProfileHead({ phone, firstName, lastName }: { phone: string; firstName:
     setEditing(false);
   }
 
-  function logout() {
-    setVerified(false);
-    // Only the visible list resets; the account keeps its own copy and
+  async function logout() {
+    // Only the visible wishlist resets; the account keeps its own copy and
     // it comes back on the next login.
-    saveWishlist([]);
+    await logOut();
     router.push("/");
   }
 

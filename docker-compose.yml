@@ -22,6 +22,8 @@ services:
     environment:
       DATABASE_URL: postgres://reyso:reyso@db:5432/reyso
       PAYLOAD_SECRET: local-trial-secret-not-for-production
+      # No SMS is sent: the login code is always 12345.
+      SMS_DEMO: "1"
       NEXT_PUBLIC_SITE_URL: http://localhost:3000
     ports:
       - "3000:3000"

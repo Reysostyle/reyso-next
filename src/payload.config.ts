@@ -5,8 +5,10 @@ import { fa } from "@payloadcms/translations/languages/fa";
 import { buildConfig, type CollectionConfig } from "payload";
 import sharp from "sharp";
 import { Categories } from "./payload/collections/Categories";
+import { Customers } from "./payload/collections/Customers";
 import { Lessons } from "./payload/collections/Lessons";
 import { Media } from "./payload/collections/Media";
+import { OtpCodes } from "./payload/collections/OtpCodes";
 import { Products } from "./payload/collections/Products";
 import { Users } from "./payload/collections/Users";
 import { Home } from "./payload/globals/Home";
@@ -47,7 +49,7 @@ export default buildConfig({
     },
   },
   i18n: { supportedLanguages: { fa }, fallbackLanguage: "fa" },
-  collections: [Products, Categories, Media, Lessons, Users].map(withDocDates),
+  collections: [Products, Categories, Media, Customers, Lessons, Users, OtpCodes].map(withDocDates),
   globals: [Home],
   secret: process.env.PAYLOAD_SECRET || "",
   typescript: { outputFile: path.resolve(dirname, "payload-types.ts") },

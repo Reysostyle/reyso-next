@@ -199,6 +199,29 @@
     color: var(--color-base-600);
   }
 
+  // Read-only custom fields (Persian dates, wishlist)
+  .reyso-readonly {
+    margin-bottom: 24px;
+  }
+  .reyso-readonly .field-label {
+    display: block;
+    margin-bottom: 8px;
+  }
+  .reyso-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .reyso-chips a {
+    padding: 4px 12px;
+    border-radius: 999px;
+    background: var(--color-base-100);
+    color: var(--reyso-green);
+    text-decoration: none;
+    font-size: 13px;
+    direction: ltr;
+  }
+
   // Dashboard
   .reyso-dash {
     display: flex;

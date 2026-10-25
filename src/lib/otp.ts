@@ -1,34 +1,26 @@
-import { REYSO_CONFIG } from "./config";
+"use client";
 
-export const MOCK_OTP_FALLBACK = "12345"; // only used when VERIFY_OTP_URL is unset
+import { ACCOUNTS_API, adoptRemote, sendCode, verifyCode } from "./account";
 
-/** Asks the SMS webhook to send a code. Failures are swallowed: the
- *  resend button on the code step gives the customer another try. */
-export async function requestOtp(phone: string) {
-  if (!REYSO_CONFIG.SEND_OTP_URL) return;
-  try {
-    await fetch(REYSO_CONFIG.SEND_OTP_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ phone }),
-    });
-  } catch {
-    // ignore
-  }
+export const MOCK_OTP_FALLBACK = "12345"; // GitHub Pages preview only (no server)
+
+export type OtpResult = { ok: true } | { ok: false; error: string; retryAfter?: number };
+
+/** Asks the server to text a login code to the number. */
+export async function requestOtp(phone: string): Promise<OtpResult> {
+  if (!ACCOUNTS_API) return { ok: true };
+  const res = await sendCode(phone);
+  return res.ok ? { ok: true } : { ok: false, error: res.error, retryAfter: res.retryAfter };
 }
 
-export async function verifyOtp(phone: string, code: string): Promise<boolean> {
-  if (!REYSO_CONFIG.VERIFY_OTP_URL) return code === MOCK_OTP_FALLBACK;
-  try {
-    const res = await fetch(REYSO_CONFIG.VERIFY_OTP_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ phone, code }),
-    });
-    if (!res.ok) return false;
-    const data = await res.json();
-    return !!data.verified;
-  } catch {
-    return false;
+/** Checks the code; on success the server account is loaded into the
+ *  browser (and created on first login). */
+export async function verifyOtp(phone: string, code: string): Promise<OtpResult> {
+  if (!ACCOUNTS_API) {
+    return code === MOCK_OTP_FALLBACK ? { ok: true } : { ok: false, error: "" };
   }
+  const res = await verifyCode(phone, code);
+  if (!res.ok) return { ok: false, error: res.error };
+  adoptRemote(res.data, true);
+  return { ok: true };
 }

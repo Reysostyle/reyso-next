@@ -15,6 +15,7 @@ export function PhoneStep() {
   const [phone, setPhone] = useState("");
   const [invalid, setInvalid] = useState(false);
   const [sending, setSending] = useState(false);
+  const [sendError, setSendError] = useState("");
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -31,7 +32,14 @@ export function PhoneStep() {
     if (getLoggedInPhone() !== value) setVerified(false);
     setCheckoutPhone(value);
     setSending(true);
-    await requestOtp(value);
+    setSendError("");
+    const sent = await requestOtp(value);
+    // A code sent a moment ago is still valid: carry on to the code step.
+    if (!sent.ok && !sent.retryAfter) {
+      setSending(false);
+      setSendError(sent.error);
+      return;
+    }
     router.push("/checkout/otp");
   }
 
@@ -62,6 +70,9 @@ export function PhoneStep() {
             />
             <p className="auth-error" id="phone-error" hidden={!invalid}>
               شماره موبایل باید ۱۱ رقم باشه و با ۰۹ شروع بشه.
+            </p>
+            <p className="auth-error" hidden={!sendError || invalid}>
+              {sendError}
             </p>
             <button type="submit" className="auth-submit-btn" id="phone-submit-btn" disabled={sending}>
               {sending ? (
