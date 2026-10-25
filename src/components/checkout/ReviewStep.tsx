@@ -11,8 +11,17 @@ import {
   getMockCustomer,
   saveMockCustomer,
 } from "@/lib/customer";
+import { ACCOUNTS_API } from "@/lib/account";
 import { type AppliedDiscount, resolveDiscountCode } from "@/lib/discounts";
-import { LAST_ORDER_ID_KEY, submitOrder, telegramBotLink } from "@/lib/orders";
+import {
+  LAST_ORDER_ID_KEY,
+  ONLINE_PAYMENT,
+  type Quote,
+  fetchQuote,
+  placeOrder,
+  submitOrderLocally,
+  telegramBotLink,
+} from "@/lib/orders";
 import { formatToman } from "@/lib/products";
 import { AuthSteps, hasFullProfile } from "./AuthSteps";
 import { useVerifiedPhone } from "./useCheckoutGuard";
@@ -46,10 +55,14 @@ export function ReviewStep() {
 function ReviewContent({ phone }: { phone: string }) {
   const router = useRouter();
   // Snapshot on mount: the order is built from what was reviewed.
-  const [{ customer, addresses, cart }] = useState(() => {
+  const [{ customer, addresses, cart: initialCart }] = useState(() => {
     const c = getMockCustomer(phone);
     return { customer: c, addresses: getCustomerAddresses(c), cart: getCart() };
   });
+  // With the server, prices shown here come from the catalogue on the
+  // server (the cart's are copies from when items were added).
+  const [cart, setCart] = useState(initialCart);
+  const [quoteError, setQuoteError] = useState("");
   const defaultAddress = getDefaultAddress(customer);
   const ready = hasFullProfile(customer, defaultAddress) && cart.length > 0;
 
@@ -67,6 +80,26 @@ function ReviewContent({ phone }: { phone: string }) {
     else if (cart.length === 0) router.replace("/cart");
   }, [customer, defaultAddress, cart.length, router]);
 
+  function applyQuote(lines: Quote["lines"]) {
+    setCart(
+      initialCart.map((line) => ({
+        ...line,
+        price:
+          lines.find((l) => l.id === line.id && l.size === line.size && l.color === line.color)?.price ??
+          line.price,
+      })),
+    );
+  }
+
+  useEffect(() => {
+    if (!ACCOUNTS_API || initialCart.length === 0) return;
+    fetchQuote(initialCart).then((res) => {
+      if (!res.ok) return setQuoteError(res.error);
+      applyQuote(res.data.lines);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once, for the cart snapshot
+  }, [initialCart]);
+
   if (!ready || !customer || !defaultAddress) return null;
 
   const selected = addresses.find((a) => a.id === selectedId) ?? defaultAddress;
@@ -75,18 +108,25 @@ function ReviewContent({ phone }: { phone: string }) {
   const subtotal = cartSubtotal(cart);
   const total = Math.max(0, subtotal - (discount?.amount ?? 0) + shippingCost);
 
-  function applyDiscount() {
+  async function applyDiscount() {
     const raw = discountInput.trim();
     if (!raw) {
       setDiscount(null);
       setDiscountNote("یه کد وارد کن.");
       return;
     }
-    const resolved = resolveDiscountCode(raw, subtotal);
+    let resolved: AppliedDiscount | null;
+    let error = "این کد تخفیف معتبر نیست.";
+    if (ACCOUNTS_API) {
+      const res = await fetchQuote(cart, raw);
+      resolved = res.ok ? res.data.discount : null;
+      if (res.ok && res.data.discountError) error = res.data.discountError;
+      else if (!res.ok) error = res.error;
+    } else {
+      resolved = resolveDiscountCode(raw, subtotal);
+    }
     setDiscount(resolved);
-    setDiscountNote(
-      resolved ? "کد «" + resolved.code + "» اعمال شد — " + resolved.label + "." : "این کد تخفیف معتبر نیست.",
-    );
+    setDiscountNote(resolved ? "کد «" + resolved.code + "» اعمال شد — " + resolved.label + "." : error);
   }
 
   async function submit() {
@@ -94,7 +134,45 @@ function ReviewContent({ phone }: { phone: string }) {
     setFormNote("");
     setSubmitting(true);
 
-    const result = await submitOrder({
+    if (ACCOUNTS_API) {
+      const res = await placeOrder({
+        cart,
+        name: fullName,
+        address: selected,
+        telegram: tg,
+        notes: notes.trim(),
+        discountCode: discount?.code ?? "",
+        expectedTotal: total,
+      });
+      if (!res.ok) {
+        setSubmitting(false);
+        setFormNote(res.error);
+        // Prices changed since the page loaded: show the new ones.
+        if (res.status === 409) {
+          const q = await fetchQuote(cart, discount?.code ?? "");
+          if (q.ok) {
+            applyQuote(q.data.lines);
+            setDiscount(q.data.discount);
+          }
+        }
+        return;
+      }
+      localStorage.setItem(LAST_ORDER_ID_KEY, res.data.orderId);
+      clearCart();
+      if (tg) saveMockCustomer(phone, { telegram: tg });
+      if (res.data.payUrl) {
+        window.location.assign(res.data.payUrl);
+        return;
+      }
+      router.push(
+        res.data.payError
+          ? "/checkout/result?status=failed&order=" + encodeURIComponent(res.data.orderId)
+          : "/profile?new_order=" + encodeURIComponent(res.data.orderId),
+      );
+      return;
+    }
+
+    const orderId = submitOrderLocally({
       createdAt: new Date().toISOString(),
       customer: {
         name: fullName,
@@ -111,20 +189,10 @@ function ReviewContent({ phone }: { phone: string }) {
       total,
       notes: notes.trim(),
     });
-
-    if (!result.ok) {
-      setSubmitting(false);
-      setFormNote(
-        "ثبت سفارش انجام نشد. اتصال اینترنت رو بررسی کن و دوباره امتحان کن، یا از اینستاگرام پیام بده.",
-      );
-      return;
-    }
-
-    localStorage.setItem(LAST_ORDER_ID_KEY, result.orderId);
+    localStorage.setItem(LAST_ORDER_ID_KEY, orderId);
     clearCart();
     if (tg) saveMockCustomer(phone, { telegram: tg });
-    // No payment page yet: the profile lists the new order with a banner.
-    router.push("/profile?new_order=" + encodeURIComponent(result.orderId));
+    router.push("/profile?new_order=" + encodeURIComponent(orderId));
   }
 
   return (
@@ -284,17 +352,19 @@ function ReviewContent({ phone }: { phone: string }) {
               "در حال ثبت سفارش..."
             ) : (
               <>
-                تأیید اطلاعات و ثبت سفارش
+                {ONLINE_PAYMENT ? "تأیید و پرداخت" : "تأیید اطلاعات و ثبت سفارش"}
                 <i className="ri-arrow-left-line"></i>
               </>
             )}
           </button>
-          <p className="review-form-note" id="review-form-note" hidden={!formNote}>
-            {formNote}
+          <p className="review-form-note" id="review-form-note" hidden={!formNote && !quoteError}>
+            {formNote || quoteError}
           </p>
           <p className="review-secure-note">
             <i className="ri-shield-check-line"></i>
-            ثبت امن سفارش با شماره‌ی تأییدشده‌ی شما؛ هماهنگی پرداخت از طریق تلگرام
+            {ONLINE_PAYMENT
+              ? "پرداخت امن از طریق درگاه بانکی زرین‌پال"
+              : "ثبت امن سفارش با شماره‌ی تأییدشده‌ی شما؛ هماهنگی پرداخت از طریق تلگرام"}
           </p>
         </div>
       </aside>

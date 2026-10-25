@@ -2,12 +2,22 @@ import type { CartLine } from "./cart";
 import { REYSO_CONFIG } from "./config";
 import type { OrderStatus, TrackLookup } from "./order-status";
 
+// With the server running (ACCOUNTS_API), orders are placed, priced and
+// paid for on the server (src/app/(store-api)/api/orders). The GitHub
+// Pages preview has no server and keeps them in the browser, as the old
+// site did.
+
+/** Online payment is on (Zarinpal or the local demo gateway). */
+export const ONLINE_PAYMENT = process.env.NEXT_PUBLIC_ONLINE_PAYMENT === "1";
+
 export const PENDING_ORDERS_KEY = "reyso_pending_orders";
 export const LAST_ORDER_ID_KEY = "reyso_last_order_id";
 
 export type Order = {
   orderId?: string;
-  status?: OrderStatus;
+  status?: OrderStatus | "pending_payment" | "cancelled";
+  paymentStatus?: "unpaid" | "paid" | "manual";
+  refId?: string;
   trackingCode?: string;
   createdAt: string;
   customer: { name: string; phone: string; telegram: string; address: string; shipping: string };
@@ -21,8 +31,7 @@ export type Order = {
 };
 
 /** Date+time based and readable aloud: "RS260831-1423" = 14:23 on
- *  2026-08-31. Two orders in the same minute would collide; acceptable
- *  for now, the order backend should issue ids instead. */
+ *  2026-08-31. Only used without a server, which issues its own ids. */
 export function generateOrderId(now = new Date()): string {
   const p = (n: number) => String(n).padStart(2, "0");
   return (
@@ -58,39 +67,73 @@ export function getCustomerOrders(phone: string): Order[] {
     .sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt));
 }
 
-export type SubmitResult = { ok: true; orderId: string } | { ok: false };
-
-/**
- * Sends the order to ORDER_API_URL. With no URL configured (demo mode)
- * the order is only kept in this browser, as on the old site. When a
- * URL is configured and the request fails, the order is NOT reported as
- * placed: the old site saved it locally and told the customer it was
- * registered, so the shop never saw it.
- */
-export async function submitOrder(order: Order): Promise<SubmitResult> {
+/** Keeps the order in this browser only (no server: GitHub Pages preview). */
+export function submitOrderLocally(order: Order): string {
   const local: Order = { ...order, orderId: generateOrderId(), status: "registered" };
+  savePendingOrderLocally(local);
+  return local.orderId!;
+}
 
-  if (!REYSO_CONFIG.ORDER_API_URL) {
-    savePendingOrderLocally(local);
-    return { ok: true, orderId: local.orderId! };
-  }
+type ApiResult<T> = { ok: true; data: T } | { ok: false; status: number; error: string; data?: T };
 
+async function api<T>(path: string, init?: RequestInit): Promise<ApiResult<T>> {
   try {
-    const res = await fetch(REYSO_CONFIG.ORDER_API_URL, {
-      method: "POST",
+    const res = await fetch("/api/" + path, {
+      ...init,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(local),
+      credentials: "same-origin",
     });
-    if (!res.ok) throw new Error("bad status " + res.status);
-    const data = await res.json().catch(() => ({}));
-    const orderId: string = data.orderId || local.orderId!;
-    // Kept locally too so the profile page can list it.
-    savePendingOrderLocally({ ...local, orderId });
-    return { ok: true, orderId };
+    const body = await res.json().catch(() => ({}));
+    if (res.ok) return { ok: true, data: body as T };
+    return {
+      ok: false,
+      status: res.status,
+      error: body.error || "مشکلی پیش اومد. دوباره امتحان کن.",
+      data: body,
+    };
   } catch {
-    return { ok: false };
+    return { ok: false, status: 0, error: "اتصال برقرار نشد. اینترنتت رو چک کن و دوباره امتحان کن." };
   }
 }
+
+const cartItems = (cart: CartLine[]) => cart.map(({ id, size, color, qty }) => ({ id, size, color, qty }));
+
+export type Quote = {
+  lines: { id: string; size: string; color: string; price: number }[];
+  subtotal: number;
+  discount: { code: string; amount: number; label: string } | null;
+  discountError: string | null;
+  shippingCost: number;
+  total: number;
+};
+
+/** Server prices for the cart and an optional discount code. */
+export const fetchQuote = (cart: CartLine[], discountCode = "") =>
+  api<Quote>("orders/quote", {
+    method: "POST",
+    body: JSON.stringify({ items: cartItems(cart), discountCode }),
+  });
+
+export type PlaceOrderInput = {
+  cart: CartLine[];
+  name: string;
+  address: { province?: string; city?: string; full: string; postal: string };
+  telegram: string;
+  notes: string;
+  discountCode: string;
+  expectedTotal: number;
+};
+
+export const placeOrder = (input: PlaceOrderInput) =>
+  api<{ orderId: string; payUrl?: string | null; payError?: string | null; total?: number }>("orders", {
+    method: "POST",
+    body: JSON.stringify({ ...input, cart: undefined, items: cartItems(input.cart) }),
+  });
+
+export const payOrder = (orderId: string) =>
+  api<{ payUrl: string }>(`orders/${encodeURIComponent(orderId)}/pay`, { method: "POST" });
+
+export const fetchMyOrders = () => api<{ orders: Order[] }>("orders");
 
 export function telegramBotLink(phoneDigits?: string): string {
   if (!REYSO_CONFIG.TELEGRAM_BOT_USERNAME) return "https://telegram.org";
@@ -98,10 +141,10 @@ export function telegramBotLink(phoneDigits?: string): string {
   return phoneDigits ? base + "?start=" + phoneDigits : base;
 }
 
-/** Asks TRACK_LOOKUP_URL for an order's current status. Throws when the
+/** Asks the server for an order's current status. Throws when the
  *  request fails so callers can fall back to the local copy. */
 export async function lookupOrderRemote(orderId: string): Promise<TrackLookup> {
-  const res = await fetch(REYSO_CONFIG.TRACK_LOOKUP_URL + "/" + encodeURIComponent(orderId));
+  const res = await fetch("/api/orders/track/" + encodeURIComponent(orderId));
   if (!res.ok) throw new Error("bad status " + res.status);
   return res.json();
 }

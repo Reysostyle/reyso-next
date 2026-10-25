@@ -4903,6 +4903,79 @@ body:not(.menu-open) .mobile-menu-links li {
   font-weight: 600;
 }
 
+/* Unpaid or cancelled orders show a note instead of the steps */
+.profile-order-note {
+  font-size: 12.5px;
+  color: var(--text-soft);
+}
+
+.profile-order-pay {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.profile-order-pay .auth-error {
+  width: 100%;
+  margin-top: 0;
+  text-align: right;
+}
+
+.profile-order-pay-btn {
+  background: var(--gold);
+  color: var(--deep-green-700);
+  padding: 9px 22px;
+  border-radius: var(--r-full);
+  font-size: 13px;
+  font-weight: 700;
+  transition:
+    background var(--t-fast),
+    opacity var(--t-fast);
+}
+
+.profile-order-pay-btn:hover {
+  background: var(--gold-light);
+}
+
+.profile-order-pay-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+/* Payment result and demo gateway pages reuse .profile-guest */
+.pay-result-meta {
+  font-size: 13px;
+  color: var(--text-soft);
+  margin: -14px 0 26px;
+}
+
+.pay-result-meta bdi {
+  color: var(--deep-green);
+  font-weight: 700;
+}
+
+.pay-result-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+}
+
+.pay-result-link {
+  display: inline-flex;
+  align-items: center;
+  padding: 14px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--deep-green);
+}
+
+.profile-guest.is-failed > i {
+  color: #c0392b;
+}
+
 @media (max-width: 640px) {
   .profile-orders-list {
     grid-template-columns: 1fr;

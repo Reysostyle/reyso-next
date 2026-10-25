@@ -199,6 +199,35 @@
     color: var(--color-base-600);
   }
 
+  // Order status and payment badges
+  .reyso-status--pending_payment,
+  .reyso-pay--unpaid {
+    background: #f6ead2;
+    color: #8a5a10;
+  }
+  .reyso-status--registered {
+    background: var(--reyso-gold-soft);
+    color: #6f5a2c;
+  }
+  .reyso-status--sewing,
+  .reyso-status--ready {
+    background: var(--color-success-100);
+    color: var(--reyso-green);
+  }
+  .reyso-status--shipped,
+  .reyso-pay--paid {
+    background: var(--reyso-green);
+    color: #f7f3ea;
+  }
+  .reyso-status--cancelled {
+    background: #f6dcd8;
+    color: #9b2c22;
+  }
+  .reyso-pay--manual {
+    background: var(--color-base-150);
+    color: var(--color-base-650);
+  }
+
   // Read-only custom fields (Persian dates, wishlist)
   .reyso-readonly {
     margin-bottom: 24px;
@@ -340,5 +369,263 @@
   .reyso-dash__name {
     flex: 1;
     font-weight: 500;
+  }
+  .reyso-dash__code {
+    font-weight: 600;
+    color: var(--reyso-green);
+    min-width: 120px;
+    text-align: end;
+  }
+  @media (max-width: 700px) {
+    .reyso-dash__recent a {
+      flex-wrap: wrap;
+      gap: 6px 12px;
+    }
+    .reyso-dash__code {
+      min-width: 0;
+    }
+  }
+
+  // Sales report
+  .reyso-panel {
+    padding: 22px 24px;
+    border-radius: 12px;
+    background: var(--color-base-0);
+    border: 1px solid var(--color-base-150);
+  }
+  .reyso-panel__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+  .reyso-panel__head h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--reyso-green);
+  }
+  .reyso-range {
+    display: flex;
+    gap: 4px;
+    padding: 3px;
+    border-radius: 999px;
+    background: var(--color-base-50);
+  }
+  .reyso-range a {
+    padding: 5px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    color: var(--color-base-600);
+    text-decoration: none;
+  }
+  .reyso-range a.is-active {
+    background: var(--reyso-green);
+    color: #fff;
+  }
+  .reyso-empty {
+    margin: 0;
+    padding: 28px 0;
+    text-align: center;
+    color: var(--color-base-500);
+  }
+  .reyso-kpis {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+    margin-bottom: 22px;
+  }
+  .reyso-kpis div {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: var(--color-base-50);
+  }
+  .reyso-kpis b {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--reyso-green);
+  }
+  .reyso-kpis span {
+    font-size: 12.5px;
+    color: var(--color-base-600);
+  }
+
+  .reyso-chart {
+    margin: 0 0 24px;
+  }
+  .reyso-chart figcaption {
+    font-size: 13px;
+    color: var(--color-base-600);
+    margin-bottom: 8px;
+  }
+  .reyso-chart__plot {
+    position: relative;
+    height: 170px;
+    border-bottom: 1px solid var(--color-base-200);
+    background: linear-gradient(var(--color-base-100) 1px, transparent 1px) 0 0 / 100% 50%;
+  }
+  .reyso-chart__max {
+    position: absolute;
+    top: -2px;
+    inset-inline-end: 0;
+    transform: translateY(-100%);
+    font-size: 11px;
+    color: var(--color-base-500);
+  }
+  .reyso-chart__bars {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+  }
+  .reyso-chart__bar {
+    position: relative;
+    flex: 1;
+    height: 100%;
+    display: flex;
+    align-items: flex-end;
+    outline: none;
+  }
+  .reyso-chart__bar span {
+    display: block;
+    width: 100%;
+    min-height: 1px;
+    max-width: 28px;
+    margin: 0 auto;
+    border-radius: 4px 4px 0 0;
+    background: var(--reyso-green);
+  }
+  .reyso-chart__bar:hover span,
+  .reyso-chart__bar:focus span {
+    background: var(--reyso-gold);
+  }
+  .reyso-chart__bar:hover::after,
+  .reyso-chart__bar:focus::after {
+    content: attr(data-tip);
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2;
+    padding: 6px 10px;
+    border-radius: 8px;
+    background: var(--color-base-900);
+    color: #fff;
+    font-size: 12px;
+    white-space: nowrap;
+    direction: rtl;
+    pointer-events: none;
+  }
+  .reyso-chart__bar:first-child:hover::after,
+  .reyso-chart__bar:first-child:focus::after {
+    left: 0;
+    transform: none;
+  }
+  .reyso-chart__bar:last-child:hover::after,
+  .reyso-chart__bar:last-child:focus::after {
+    left: auto;
+    right: 0;
+    transform: none;
+  }
+  .reyso-chart__axis {
+    display: flex;
+    gap: 2px;
+    margin-top: 6px;
+  }
+  .reyso-chart__axis span {
+    flex: 1;
+    font-size: 11px;
+    color: var(--color-base-500);
+    text-align: center;
+    white-space: nowrap;
+    overflow: visible;
+    width: 0;
+  }
+  .reyso-chart__table {
+    margin-top: 12px;
+    font-size: 13px;
+  }
+  .reyso-chart__table summary {
+    cursor: pointer;
+    color: var(--color-base-600);
+  }
+
+  .reyso-chart__table table,
+  .reyso-discounts table {
+    width: 100%;
+    margin-top: 8px;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .reyso-chart__table th,
+  .reyso-chart__table td,
+  .reyso-discounts th,
+  .reyso-discounts td {
+    padding: 6px 8px;
+    text-align: start;
+    border-bottom: 1px solid var(--color-base-100);
+  }
+  .reyso-chart__table th,
+  .reyso-discounts th {
+    color: var(--color-base-500);
+    font-weight: 500;
+  }
+
+  .reyso-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 22px 32px;
+  }
+  .reyso-rank h4,
+  .reyso-discounts h4 {
+    margin: 0 0 10px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--reyso-green);
+  }
+  .reyso-rank ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .reyso-rank li {
+    display: grid;
+    grid-template-columns: minmax(90px, 1.2fr) 2fr auto;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+  }
+  .reyso-rank__label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .reyso-rank__track {
+    height: 8px;
+    border-radius: 999px;
+    background: var(--color-base-100);
+    overflow: hidden;
+  }
+  .reyso-rank__track span {
+    display: block;
+    height: 100%;
+    border-radius: 999px;
+    background: var(--reyso-green);
+  }
+  .reyso-rank__value {
+    color: var(--color-base-600);
+    white-space: nowrap;
+  }
+  .reyso-discounts {
+    margin-top: 24px;
   }
 }

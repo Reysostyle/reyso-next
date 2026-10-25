@@ -6,8 +6,10 @@ import { buildConfig, type CollectionConfig } from "payload";
 import sharp from "sharp";
 import { Categories } from "./payload/collections/Categories";
 import { Customers } from "./payload/collections/Customers";
+import { DiscountCodes } from "./payload/collections/DiscountCodes";
 import { Lessons } from "./payload/collections/Lessons";
 import { Media } from "./payload/collections/Media";
+import { Orders } from "./payload/collections/Orders";
 import { OtpCodes } from "./payload/collections/OtpCodes";
 import { Products } from "./payload/collections/Products";
 import { Users } from "./payload/collections/Users";
@@ -49,7 +51,9 @@ export default buildConfig({
     },
   },
   i18n: { supportedLanguages: { fa }, fallbackLanguage: "fa" },
-  collections: [Products, Categories, Media, Customers, Lessons, Users, OtpCodes].map(withDocDates),
+  collections: [Orders, Products, Categories, Media, Customers, DiscountCodes, Lessons, Users, OtpCodes].map(
+    withDocDates,
+  ),
   globals: [Home],
   secret: process.env.PAYLOAD_SECRET || "",
   typescript: { outputFile: path.resolve(dirname, "payload-types.ts") },

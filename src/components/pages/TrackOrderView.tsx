@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { REYSO_CONFIG } from "@/lib/config";
+import { ACCOUNTS_API } from "@/lib/account";
 import { useRaw } from "@/lib/local-store";
 import { LAST_ORDER_ID_KEY, lookupOrderLocal, lookupOrderRemote } from "@/lib/orders";
 import { ORDER_STATUS_STEPS, type TrackLookup, stepStates } from "@/lib/order-status";
@@ -29,7 +29,7 @@ export function TrackOrderView() {
 
     let data: TrackLookup;
     try {
-      data = REYSO_CONFIG.TRACK_LOOKUP_URL ? await lookupOrderRemote(id) : lookupOrderLocal(id);
+      data = ACCOUNTS_API ? await lookupOrderRemote(id) : lookupOrderLocal(id);
     } catch {
       data = lookupOrderLocal(id);
     }

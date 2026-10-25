@@ -67,10 +67,12 @@ export interface Config {
   };
   blocks: {};
   collections: {
+    orders: Order;
     products: Product;
     categories: Category;
     media: Media;
     customers: Customer;
+    'discount-codes': DiscountCode;
     lessons: Lesson;
     users: User;
     'otp-codes': OtpCode;
@@ -81,10 +83,12 @@ export interface Config {
   };
   collectionsJoins: {};
   collectionsSelect: {
+    orders: OrdersSelect<false> | OrdersSelect<true>;
     products: ProductsSelect<false> | ProductsSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     customers: CustomersSelect<false> | CustomersSelect<true>;
+    'discount-codes': DiscountCodesSelect<false> | DiscountCodesSelect<true>;
     lessons: LessonsSelect<false> | LessonsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'otp-codes': OtpCodesSelect<false> | OtpCodesSelect<true>;
@@ -130,6 +134,92 @@ export interface UserAuthOperations {
     email: string;
     password: string;
   };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "orders".
+ */
+export interface Order {
+  id: number;
+  orderNumber: string;
+  status: 'pending_payment' | 'registered' | 'sewing' | 'ready' | 'shipped' | 'cancelled';
+  /**
+   * بعد از ارسال وارد کنید تا مشتری در صفحه پیگیری ببیند.
+   */
+  trackingCode?: string | null;
+  customer?: (number | null) | Customer;
+  customerName: string;
+  phone: string;
+  province?: string | null;
+  city?: string | null;
+  postal?: string | null;
+  address: string;
+  shipping?: string | null;
+  telegram?: string | null;
+  notes?: string | null;
+  items: {
+    product?: (number | null) | Product;
+    productSlug: string;
+    name: string;
+    size: string;
+    color: string;
+    qty: number;
+    unitPrice: number;
+    image?: string | null;
+    id?: string | null;
+  }[];
+  subtotal: number;
+  discountCode?: string | null;
+  discountAmount?: number | null;
+  shippingCost?: number | null;
+  total: number;
+  paymentStatus: 'unpaid' | 'paid' | 'manual';
+  payment?: {
+    gateway?: string | null;
+    authority?: string | null;
+    refId?: string | null;
+    cardPan?: string | null;
+    paidAt?: string | null;
+  };
+  createdAt: string;
+  updatedAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "customers".
+ */
+export interface Customer {
+  id: number;
+  phone: string;
+  firstName?: string | null;
+  lastName?: string | null;
+  email?: string | null;
+  birthday?: string | null;
+  telegram?: string | null;
+  addresses?:
+    | {
+        clientId?: string | null;
+        label?: string | null;
+        province?: string | null;
+        city?: string | null;
+        full: string;
+        postal?: string | null;
+        isDefault?: boolean | null;
+        id?: string | null;
+      }[]
+    | null;
+  wishlist?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  lastLoginAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -197,38 +287,25 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "customers".
+ * via the `definition` "discount-codes".
  */
-export interface Customer {
+export interface DiscountCode {
   id: number;
-  phone: string;
-  firstName?: string | null;
-  lastName?: string | null;
-  email?: string | null;
-  birthday?: string | null;
-  telegram?: string | null;
-  addresses?:
-    | {
-        clientId?: string | null;
-        label?: string | null;
-        province?: string | null;
-        city?: string | null;
-        full: string;
-        postal?: string | null;
-        isDefault?: boolean | null;
-        id?: string | null;
-      }[]
-    | null;
-  wishlist?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  lastLoginAt?: string | null;
+  code: string;
+  active?: boolean | null;
+  type: 'percent' | 'fixed';
+  value: number;
+  /**
+   * مثلاً «۱۰٪ تخفیف»
+   */
+  label: string;
+  minSubtotal?: number | null;
+  maxUses?: number | null;
+  usedCount?: number | null;
+  /**
+   * خالی = بدون انقضا
+   */
+  expiresAt?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -318,6 +395,10 @@ export interface PayloadLockedDocument {
   id: number;
   document?:
     | ({
+        relationTo: 'orders';
+        value: number | Order;
+      } | null)
+    | ({
         relationTo: 'products';
         value: number | Product;
       } | null)
@@ -332,6 +413,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'customers';
         value: number | Customer;
+      } | null)
+    | ({
+        relationTo: 'discount-codes';
+        value: number | DiscountCode;
       } | null)
     | ({
         relationTo: 'lessons';
@@ -386,6 +471,55 @@ export interface PayloadMigration {
   batch?: number | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "orders_select".
+ */
+export interface OrdersSelect<T extends boolean = true> {
+  orderNumber?: T;
+  status?: T;
+  trackingCode?: T;
+  customer?: T;
+  customerName?: T;
+  phone?: T;
+  province?: T;
+  city?: T;
+  postal?: T;
+  address?: T;
+  shipping?: T;
+  telegram?: T;
+  notes?: T;
+  items?:
+    | T
+    | {
+        product?: T;
+        productSlug?: T;
+        name?: T;
+        size?: T;
+        color?: T;
+        qty?: T;
+        unitPrice?: T;
+        image?: T;
+        id?: T;
+      };
+  subtotal?: T;
+  discountCode?: T;
+  discountAmount?: T;
+  shippingCost?: T;
+  total?: T;
+  paymentStatus?: T;
+  payment?:
+    | T
+    | {
+        gateway?: T;
+        authority?: T;
+        refId?: T;
+        cardPan?: T;
+        paidAt?: T;
+      };
+  createdAt?: T;
+  updatedAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -472,6 +606,23 @@ export interface CustomersSelect<T extends boolean = true> {
       };
   wishlist?: T;
   lastLoginAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "discount-codes_select".
+ */
+export interface DiscountCodesSelect<T extends boolean = true> {
+  code?: T;
+  active?: T;
+  type?: T;
+  value?: T;
+  label?: T;
+  minSubtotal?: T;
+  maxUses?: T;
+  usedCount?: T;
+  expiresAt?: T;
   updatedAt?: T;
   createdAt?: T;
 }

@@ -3,8 +3,6 @@
 // customer could reach. They now come from environment variables; an
 // empty value keeps the same mock behaviour the old site had.
 export const REYSO_CONFIG = {
-  ORDER_API_URL: process.env.NEXT_PUBLIC_ORDER_API_URL ?? "",
-  TRACK_LOOKUP_URL: process.env.NEXT_PUBLIC_TRACK_LOOKUP_URL ?? "",
   SUPPORT_CHAT_URL: process.env.NEXT_PUBLIC_SUPPORT_CHAT_URL ?? "",
   TELEGRAM_BOT_USERNAME: process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME ?? "",
   WHATSAPP_NUMBER: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "",
