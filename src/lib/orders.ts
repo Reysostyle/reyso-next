@@ -3,7 +3,7 @@ import { REYSO_CONFIG } from "./config";
 import type { OrderStatus, TrackLookup } from "./order-status";
 
 // With the server running (ACCOUNTS_API), orders are placed, priced and
-// paid for on the server (src/app/(store-api)/api/orders). The GitHub
+// paid for on the server (src/app/(store-api)/api/shop/orders). The GitHub
 // Pages preview has no server and keeps them in the browser, as the old
 // site did.
 
@@ -76,6 +76,8 @@ export function submitOrderLocally(order: Order): string {
 
 type ApiResult<T> = { ok: true; data: T } | { ok: false; status: number; error: string; data?: T };
 
+// Storefront endpoints live under /api/shop: /api/orders is the admin
+// panel's own REST API for the orders collection.
 async function api<T>(path: string, init?: RequestInit): Promise<ApiResult<T>> {
   try {
     const res = await fetch("/api/" + path, {
@@ -109,7 +111,7 @@ export type Quote = {
 
 /** Server prices for the cart and an optional discount code. */
 export const fetchQuote = (cart: CartLine[], discountCode = "") =>
-  api<Quote>("orders/quote", {
+  api<Quote>("shop/orders/quote", {
     method: "POST",
     body: JSON.stringify({ items: cartItems(cart), discountCode }),
   });
@@ -125,15 +127,15 @@ export type PlaceOrderInput = {
 };
 
 export const placeOrder = (input: PlaceOrderInput) =>
-  api<{ orderId: string; payUrl?: string | null; payError?: string | null; total?: number }>("orders", {
+  api<{ orderId: string; payUrl?: string | null; payError?: string | null; total?: number }>("shop/orders", {
     method: "POST",
     body: JSON.stringify({ ...input, cart: undefined, items: cartItems(input.cart) }),
   });
 
 export const payOrder = (orderId: string) =>
-  api<{ payUrl: string }>(`orders/${encodeURIComponent(orderId)}/pay`, { method: "POST" });
+  api<{ payUrl: string }>(`shop/orders/${encodeURIComponent(orderId)}/pay`, { method: "POST" });
 
-export const fetchMyOrders = () => api<{ orders: Order[] }>("orders");
+export const fetchMyOrders = () => api<{ orders: Order[] }>("shop/orders");
 
 export function telegramBotLink(phoneDigits?: string): string {
   if (!REYSO_CONFIG.TELEGRAM_BOT_USERNAME) return "https://telegram.org";
@@ -144,7 +146,7 @@ export function telegramBotLink(phoneDigits?: string): string {
 /** Asks the server for an order's current status. Throws when the
  *  request fails so callers can fall back to the local copy. */
 export async function lookupOrderRemote(orderId: string): Promise<TrackLookup> {
-  const res = await fetch("/api/orders/track/" + encodeURIComponent(orderId));
+  const res = await fetch("/api/shop/orders/track/" + encodeURIComponent(orderId));
   if (!res.ok) throw new Error("bad status " + res.status);
   return res.json();
 }

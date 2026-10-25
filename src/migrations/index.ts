@@ -1,6 +1,7 @@
 import * as migration_20261025_081119_initial from './20261025_081119_initial';
 import * as migration_20261025_094645_sms_login from './20261025_094645_sms_login';
 import * as migration_20261025_103443_orders_payments from './20261025_103443_orders_payments';
+import * as migration_20261025_112040_order_notifications from './20261025_112040_order_notifications';
 
 export const migrations = [
   {
@@ -16,6 +17,11 @@ export const migrations = [
   {
     up: migration_20261025_103443_orders_payments.up,
     down: migration_20261025_103443_orders_payments.down,
-    name: '20261025_103443_orders_payments'
+    name: '20261025_103443_orders_payments',
+  },
+  {
+    up: migration_20261025_112040_order_notifications.up,
+    down: migration_20261025_112040_order_notifications.down,
+    name: '20261025_112040_order_notifications'
   },
 ];

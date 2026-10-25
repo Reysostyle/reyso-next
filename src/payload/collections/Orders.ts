@@ -1,15 +1,10 @@
 import type { CollectionConfig } from "payload";
+import { notifyOrderChange, recordStatusHistory } from "../hooks/orderNotifications";
+import { ORDER_STATUSES } from "../order-statuses";
 
-export const ORDER_STATUSES = [
-  { value: "pending_payment", label: "در انتظار پرداخت" },
-  { value: "registered", label: "ثبت شد" },
-  { value: "sewing", label: "در حال دوخت" },
-  { value: "ready", label: "آماده ارسال" },
-  { value: "shipped", label: "ارسال شد" },
-  { value: "cancelled", label: "لغو شد" },
-] as const;
+export { ORDER_STATUSES };
 
-// Orders are created by the storefront (src/app/(store-api)/api/orders),
+// Orders are created by the storefront (src/app/(store-api)/api/shop/orders),
 // which prices them from the catalogue. Staff change the status here.
 export const Orders: CollectionConfig = {
   slug: "orders",
@@ -21,6 +16,10 @@ export const Orders: CollectionConfig = {
     group: "فروشگاه",
   },
   defaultSort: "-createdAt",
+  hooks: {
+    beforeChange: [recordStatusHistory],
+    afterChange: [notifyOrderChange],
+  },
   access: {
     read: ({ req }) => !!req.user,
     create: () => false,
@@ -48,7 +47,10 @@ export const Orders: CollectionConfig = {
           defaultValue: "pending_payment",
           index: true,
           options: ORDER_STATUSES.map((s) => ({ ...s })),
-          admin: { components: { Cell: "/components/admin/OrderStatusCell" } },
+          admin: {
+            description: "با هر تغییر وضعیت، به مشتری پیامک داده می‌شود.",
+            components: { Cell: "/components/admin/OrderStatusCell" },
+          },
         },
       ],
     },
@@ -56,7 +58,53 @@ export const Orders: CollectionConfig = {
       name: "trackingCode",
       label: "کد رهگیری پست",
       type: "text",
-      admin: { description: "بعد از ارسال وارد کنید تا مشتری در صفحه پیگیری ببیند." },
+      admin: { description: "بعد از ارسال وارد کنید؛ مشتری در صفحه پیگیری و پیامک می‌بیند." },
+    },
+    {
+      type: "collapsible",
+      label: "تاریخچه و پیام‌ها",
+      admin: { initCollapsed: true },
+      fields: [
+        {
+          name: "statusHistory",
+          label: "تاریخچه وضعیت",
+          type: "array",
+          admin: {
+            readOnly: true,
+            initCollapsed: true,
+            components: { RowLabel: "/components/admin/StatusHistoryLabel" },
+          },
+          labels: { singular: "تغییر", plural: "تغییرها" },
+          fields: [
+            {
+              type: "row",
+              fields: [
+                {
+                  name: "status",
+                  label: "وضعیت",
+                  type: "select",
+                  options: ORDER_STATUSES.map((s) => ({ ...s })),
+                },
+                {
+                  name: "at",
+                  label: "زمان",
+                  type: "date",
+                  admin: { components: { Field: "/components/admin/JalaliDateField" } },
+                },
+              ],
+            },
+          ],
+        },
+        {
+          name: "notifications",
+          label: "پیام‌های ارسالی",
+          type: "join",
+          collection: "notifications",
+          on: "order",
+          defaultSort: "-createdAt",
+          admin: { defaultColumns: ["channel", "text", "result", "createdAt"], allowCreate: false },
+        },
+      ],
     },
     {
       type: "collapsible",

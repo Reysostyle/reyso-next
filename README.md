@@ -49,6 +49,19 @@ With a database, orders are stored on the server (admin panel → سفارش‌�
 
 Payment goes through Zarinpal once `ZARINPAL_MERCHANT_ID` is set (`ZARINPAL_SANDBOX=1` uses Zarinpal's test gateway). An order stays "awaiting payment" until Zarinpal confirms it; the customer can pay again from their profile. Until there is a merchant ID, `PAYMENT_DEMO=1` shows a fake bank page with pay/cancel buttons; never set it in production. With neither, orders are registered without online payment (marked "manual") for payment by card transfer.
 
+### Order tracking and notifications
+
+Every status change is dated on the order (admin panel → سفارش → تاریخچه و پیام‌ها) and shown on the tracking page together with the postal tracking code. The customer gets an SMS for each change (placed, sewing, ready, shipped with the tracking code, cancelled) through a second Kavenegar verify template, `KAVENEGAR_ORDER_TEMPLATE`, with `%token` for the order number and `%token20` for what happened, e.g.:
+
+```
+ReySo
+سفارش %token: %token20
+```
+
+Each new order is also sent to the shop's Telegram (`TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`). Telegram is filtered on Iranian servers; Bale's bot API works the same way with `TELEGRAM_API_BASE=https://tapi.bale.ai`. Every message, sent or not, is listed on the order's page; while these settings are empty they show as "not configured" so the texts can be checked before going live.
+
+The storefront's own endpoints live under `/api/shop` and `/api/account`; `/api/<collection>` is the admin panel's REST API.
+
 ## Preview on GitHub Pages
 
 `.github/workflows/pages.yml` publishes a static preview to https://reysostyle.github.io/reyso-next/ on every push to `main` (enable it once under Settings → Pages → Source: GitHub Actions). The preview is a static export (`PAGES_BASE_PATH`) without the admin panel: it shows the built-in catalogue, old `.html` redirects don't apply there and the store runs in demo mode.

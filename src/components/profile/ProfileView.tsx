@@ -81,6 +81,11 @@ function OrderCard({ order }: { order: Order }) {
           ))}
         </div>
       )}
+      {order.trackingCode && status === "shipped" && (
+        <p className="profile-order-note">
+          کد رهگیری پست: <strong>{order.trackingCode}</strong>
+        </p>
+      )}
     </div>
   );
 }

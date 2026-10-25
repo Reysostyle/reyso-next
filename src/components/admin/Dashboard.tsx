@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { Payload } from "payload";
 import { formatToman, toPersianDigits } from "@/lib/format";
 import { type Ranked, type SalesReport, salesReport } from "@/lib/server/reports";
-import { ORDER_STATUSES } from "@/payload/collections/Orders";
+import { ORDER_STATUSES } from "@/payload/order-statuses";
 
 const day = new Intl.DateTimeFormat("fa-IR", {
   weekday: "long",

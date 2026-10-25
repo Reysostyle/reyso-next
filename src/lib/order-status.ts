@@ -1,5 +1,5 @@
 // Order production steps, shared by the profile page and order tracking
-// so both always show the same labels. Status is set by hand today.
+// so both always show the same labels. Staff set the status in the admin panel.
 
 export const ORDER_STATUS_STEPS = [
   { key: "registered", label: "سفارش ثبت شد", icon: "ri-file-list-3-line" },
@@ -24,4 +24,9 @@ export function stepStates(statusKey: string | undefined): string[] {
   );
 }
 
-export type TrackLookup = { found: boolean; status?: { production: string; trackingCode?: string } };
+export type TrackLookup = {
+  found: boolean;
+  status?: { production: string; trackingCode?: string };
+  /** ISO time each step was reached, by status key (server orders only). */
+  dates?: Record<string, string>;
+};
