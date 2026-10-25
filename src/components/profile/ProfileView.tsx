@@ -21,7 +21,8 @@ import {
 import { useRaw } from "@/lib/local-store";
 import { type Order, getCustomerOrders, lookupOrderRemote } from "@/lib/orders";
 import { ORDER_STATUS_STEPS, orderStatusIndex, stepStates } from "@/lib/order-status";
-import { PRODUCTS, formatToman } from "@/lib/products";
+import { useCatalog } from "@/components/CatalogProvider";
+import { formatToman } from "@/lib/products";
 import { useHydrated } from "@/lib/use-hydrated";
 import { saveWishlist, useWishlist } from "@/lib/wishlist";
 
@@ -252,7 +253,7 @@ function AddressesPanel({ phone, addresses }: { phone: string; addresses: Addres
 
 function WishlistPanel() {
   const ids = useWishlist();
-  const matches = PRODUCTS.filter((p) => ids.includes(p.id));
+  const matches = useCatalog().products.filter((p) => ids.includes(p.id));
   return (
     <>
       <div className="product-grid" id="profile-wishlist-grid">

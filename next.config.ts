@@ -1,3 +1,4 @@
+import { withPayload } from "@payloadcms/next/withPayload";
 import type { NextConfig } from "next";
 
 // Links to the old static pages (shared on Instagram, saved by
@@ -21,16 +22,22 @@ const OLD_PAGES: [string, string][] = [
 ];
 
 // PAGES_BASE_PATH is set by the GitHub Pages preview workflow: the site
-// is then exported as static files served from /<repo>, where neither
-// redirects nor src/proxy.ts can run.
+// is then exported as static files served from /<repo>, without the
+// admin panel, redirects or src/proxy.ts (the workflow removes those).
 const pagesBasePath = process.env.PAGES_BASE_PATH;
 
-const nextConfig: NextConfig = pagesBasePath
-  ? { output: "export", basePath: pagesBasePath }
-  : {
-      async redirects() {
-        return OLD_PAGES.map(([source, destination]) => ({ source, destination, permanent: true }));
-      },
-    };
+const nextConfig: NextConfig = {
+  experimental: { globalNotFound: true },
+  async redirects() {
+    return OLD_PAGES.map(([source, destination]) => ({ source, destination, permanent: true }));
+  },
+};
 
-export default nextConfig;
+// withPayload in both cases: it keeps Payload's server packages out of the
+// bundle, which the catalogue loader imports even when it isn't used.
+export default withPayload(
+  pagesBasePath
+    ? { output: "export", basePath: pagesBasePath, experimental: { globalNotFound: true } }
+    : nextConfig,
+  { devBundleServerPackages: false },
+);

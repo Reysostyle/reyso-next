@@ -1,0 +1,321 @@
+// ReySo branding for the admin panel: the storefront's font and palette
+// (deep green #1c4436, gold #ad9155, cream #f7f3ea).
+@use "../../styles/fonts";
+
+@layer payload {
+  :root {
+    --font-body: "Estedad", Tahoma, sans-serif;
+
+    // Neutral scale from cream to deep green; Payload derives backgrounds,
+    // borders, text and primary buttons from it.
+    --color-base-0: #fffdf9;
+    --color-base-50: #f7f3ea;
+    --color-base-100: #efe8d9;
+    --color-base-150: #e7dcc4;
+    --color-base-200: #dbcfb4;
+    --color-base-250: #cfc2a5;
+    --color-base-300: #bdb196;
+    --color-base-350: #aaa087;
+    --color-base-400: #9a9479;
+    --color-base-450: #8c876f;
+    --color-base-500: #7a7662;
+    --color-base-550: #6a6757;
+    --color-base-600: #5b584e;
+    --color-base-650: #4a4d44;
+    --color-base-700: #344a40;
+    --color-base-750: #26473a;
+    --color-base-800: #1c4436;
+    --color-base-850: #16382c;
+    --color-base-900: #112c22;
+    --color-base-950: #0b1f18;
+    --color-base-1000: #06120d;
+
+    --color-success-50: #eef4f0;
+    --color-success-100: #dce9e1;
+    --color-success-150: #c3d9cb;
+    --color-success-200: #a6c6b2;
+    --color-success-250: #88b299;
+    --color-success-300: #6b9e80;
+    --color-success-350: #548b6c;
+    --color-success-400: #40785a;
+    --color-success-450: #33694e;
+    --color-success-500: #285c44;
+    --color-success-550: #22523d;
+    --color-success-600: #1c4436;
+    --color-success-650: #183c30;
+    --color-success-700: #14342a;
+    --color-success-750: #112c23;
+    --color-success-800: #0e251d;
+    --color-success-850: #0b1e17;
+    --color-success-900: #081711;
+    --color-success-950: #05100c;
+
+    --reyso-gold: #ad9155;
+    --reyso-gold-soft: #e7dcc4;
+    --reyso-green: #1c4436;
+  }
+
+  body {
+    background: var(--color-base-50);
+  }
+
+  // Sidebar
+  .nav {
+    background: var(--reyso-green);
+    border-inline-end: none;
+  }
+  .nav,
+  .nav a,
+  .nav button,
+  .nav .nav-group__toggle {
+    color: #f7f3ea;
+  }
+  .nav .nav-group__label,
+  .nav .nav-group__toggle {
+    color: var(--reyso-gold);
+  }
+  .nav a:hover,
+  .nav .nav__link:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.08);
+  }
+  .nav .nav__link.active,
+  .nav a.active {
+    color: #fff;
+    background: rgba(173, 145, 85, 0.25);
+  }
+  .nav .nav__link-indicator {
+    background: var(--reyso-gold);
+  }
+
+  // Logos
+  .reyso-logo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    color: var(--reyso-green);
+    font-weight: 600;
+    font-size: 15px;
+  }
+  .reyso-logo img {
+    width: 130px;
+    height: auto;
+  }
+  .reyso-icon {
+    width: 28px;
+    height: auto;
+    display: block;
+  }
+
+  // Gregorian dates replaced by DocDates
+  .doc-controls__list-item:has(.doc-controls__value) {
+    display: none;
+  }
+  .reyso-doc-dates {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 16px;
+    color: var(--theme-elevation-500);
+    font-size: 13px;
+    margin-inline-end: auto;
+  }
+  .reyso-doc-dates b {
+    color: var(--theme-elevation-800);
+    font-weight: 500;
+  }
+
+  // Cards on the default dashboard and elsewhere
+  .card {
+    background: var(--color-base-0);
+    border: 1px solid var(--color-base-150);
+    border-radius: 12px;
+    box-shadow: none;
+  }
+  .card:hover {
+    border-color: var(--reyso-gold);
+  }
+
+  .btn--style-primary {
+    border-radius: 8px;
+  }
+
+  // List cells
+  .table td {
+    vertical-align: middle;
+  }
+  .reyso-name-link {
+    color: var(--reyso-green);
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .reyso-name-link:hover {
+    color: var(--reyso-gold);
+  }
+  .reyso-thumb {
+    width: 44px;
+    height: 56px;
+    object-fit: cover;
+    border-radius: 6px;
+    display: block;
+    background: var(--color-base-100);
+  }
+  .reyso-thumb--empty {
+    display: block;
+    width: 44px;
+    height: 56px;
+    border-radius: 6px;
+    background: var(--color-base-100);
+  }
+  .reyso-price {
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .reyso-price-hint {
+    margin-top: 6px;
+    color: var(--reyso-gold);
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .reyso-muted {
+    color: var(--theme-elevation-450);
+    font-size: 13px;
+    white-space: nowrap;
+  }
+  .reyso-badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .reyso-badge--on {
+    background: var(--color-success-100);
+    color: var(--reyso-green);
+  }
+  .reyso-badge--off {
+    background: var(--color-base-150);
+    color: var(--color-base-600);
+  }
+
+  // Dashboard
+  .reyso-dash {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-bottom: 40px;
+  }
+  .reyso-dash__hello {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 24px 28px;
+    border-radius: 16px;
+    background: var(--reyso-green);
+    color: #f7f3ea;
+  }
+  .reyso-dash__hello h2 {
+    margin: 0 0 4px;
+    color: #fff;
+    font-size: 24px;
+    font-weight: 600;
+  }
+  .reyso-dash__hello p {
+    margin: 0;
+    color: var(--reyso-gold-soft);
+  }
+  .reyso-dash__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .reyso-btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 9px 18px;
+    border-radius: 999px;
+    border: 1px solid rgba(231, 220, 196, 0.5);
+    color: #f7f3ea;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 14px;
+  }
+  .reyso-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+  }
+  .reyso-btn--primary {
+    background: var(--reyso-gold);
+    border-color: var(--reyso-gold);
+    color: #fff;
+  }
+  .reyso-btn--primary:hover {
+    background: #9a7f45;
+  }
+  .reyso-dash__stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 14px;
+  }
+  .reyso-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 18px 20px;
+    border-radius: 12px;
+    background: var(--color-base-0);
+    border: 1px solid var(--color-base-150);
+    text-decoration: none;
+    color: var(--color-base-600);
+  }
+  .reyso-stat:hover {
+    border-color: var(--reyso-gold);
+  }
+  .reyso-stat b {
+    font-size: 30px;
+    font-weight: 700;
+    color: var(--reyso-green);
+    line-height: 1.3;
+  }
+  .reyso-dash__recent {
+    padding: 20px 24px;
+    border-radius: 12px;
+    background: var(--color-base-0);
+    border: 1px solid var(--color-base-150);
+  }
+  .reyso-dash__recent h3 {
+    margin: 0 0 12px;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--reyso-green);
+  }
+  .reyso-dash__recent ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .reyso-dash__recent li + li {
+    border-top: 1px solid var(--color-base-100);
+  }
+  .reyso-dash__recent a {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 0;
+    text-decoration: none;
+    color: inherit;
+  }
+  .reyso-dash__recent img,
+  .reyso-dash__recent .reyso-thumb--empty {
+    width: 40px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 6px;
+  }
+  .reyso-dash__name {
+    flex: 1;
+    font-weight: 500;
+  }
+}

@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { PRODUCTS, getProductById } from "@/lib/products";
+import { getCatalog, getProduct } from "@/lib/catalog";
 import { ProductDetails } from "@/components/shop/ProductDetails";
 
-export function generateStaticParams() {
-  return PRODUCTS.map((p) => ({ id: p.id }));
+export async function generateStaticParams() {
+  return (await getCatalog()).products.map((p) => ({ id: p.id }));
 }
 
 export async function generateMetadata({ params }: PageProps<"/shop/[id]">): Promise<Metadata> {
-  const product = getProductById((await params).id);
+  const product = await getProduct((await params).id);
   if (!product) return {};
   return {
     title: product.name,
@@ -24,7 +24,7 @@ export async function generateMetadata({ params }: PageProps<"/shop/[id]">): Pro
 }
 
 export default async function ProductPage({ params }: PageProps<"/shop/[id]">) {
-  const product = getProductById((await params).id);
+  const product = await getProduct((await params).id);
   if (!product) notFound();
 
   const base = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";

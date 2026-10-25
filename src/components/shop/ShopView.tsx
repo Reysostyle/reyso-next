@@ -3,22 +3,24 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
-import { PRODUCTS, getCollectionBySlug } from "@/lib/products";
+import { useCatalog } from "@/components/CatalogProvider";
+import type { Product } from "@/lib/products";
 import { ProductCard } from "@/components/product/ProductCard";
 import { RecentlyViewed } from "@/components/product/RecentlyViewed";
 
 const MAX_PRICE = 5000000;
 type Sort = "newest" | "popular" | "price-asc" | "price-desc";
 
-const CATEGORIES = [...new Set(PRODUCTS.map((p) => p.category))];
-const SIZES = [...new Set(PRODUCTS.flatMap((p) => p.sizes))];
-const COLORS = (() => {
-  const seen = new Map<string, string>();
-  PRODUCTS.forEach((p) => p.colors.forEach((c) => seen.has(c.name) || seen.set(c.name, c.hex)));
-  return [...seen.entries()];
-})();
-
-const categoryLabel = (c: string) => getCollectionBySlug(c)?.name ?? c;
+// Filter options offered: whatever the catalogue actually contains.
+function filterOptions(products: Product[]) {
+  const colors = new Map<string, string>();
+  products.forEach((p) => p.colors.forEach((c) => colors.has(c.name) || colors.set(c.name, c.hex)));
+  return {
+    CATEGORIES: [...new Set(products.map((p) => p.category))],
+    SIZES: [...new Set(products.flatMap((p) => p.sizes))],
+    COLORS: [...colors.entries()],
+  };
+}
 
 function toggle(set: Set<string>, value: string): Set<string> {
   const next = new Set(set);
@@ -28,6 +30,9 @@ function toggle(set: Set<string>, value: string): Set<string> {
 }
 
 export function ShopView({ initialCategory }: { initialCategory?: string }) {
+  const { products: PRODUCTS, collections } = useCatalog();
+  const { CATEGORIES, SIZES, COLORS } = useMemo(() => filterOptions(PRODUCTS), [PRODUCTS]);
+  const categoryLabel = (c: string) => collections.find((x) => x.slug === c)?.name ?? c;
   const [categories, setCategories] = useState(
     () => new Set(initialCategory && CATEGORIES.includes(initialCategory) ? [initialCategory] : []),
   );
@@ -51,7 +56,7 @@ export function ShopView({ initialCategory }: { initialCategory?: string }) {
     else if (sort === "popular") sorted.sort((a, b) => b.popularity - a.popularity);
     else sorted.sort((a, b) => b.dateAdded - a.dateAdded);
     return sorted;
-  }, [categories, sizes, colors, maxPrice, sort]);
+  }, [PRODUCTS, categories, sizes, colors, maxPrice, sort]);
 
   const chips: { label: string; remove: () => void }[] = [
     ...[...categories].map((c) => ({

@@ -1,18 +1,18 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { COLLECTIONS, PRODUCTS, getCollectionBySlug } from "@/lib/products";
+import { getCatalog, getCollection } from "@/lib/catalog";
 import { ProductCard } from "@/components/product/ProductCard";
 import { RecentlyViewed } from "@/components/product/RecentlyViewed";
 
 const FALLBACK_DESCRIPTION = "محصولات این کالکشن از ReySo — دوخت اختصاصی با پارچه‌های منتخب و طراحی بی‌زمان.";
 
-export function generateStaticParams() {
-  return COLLECTIONS.map((c) => ({ slug: c.slug }));
+export async function generateStaticParams() {
+  return (await getCatalog()).collections.map((c) => ({ slug: c.slug }));
 }
 
 async function resolve(params: PageProps<"/collections/[slug]">["params"]) {
   const slug = decodeURIComponent((await params).slug);
-  const collection = getCollectionBySlug(slug);
+  const collection = await getCollection(slug);
   return { slug, collection, name: collection?.name ?? (slug || "کالکشن") };
 }
 
@@ -29,7 +29,7 @@ export async function generateMetadata({ params }: PageProps<"/collections/[slug
 
 export default async function CollectionPage({ params }: PageProps<"/collections/[slug]">) {
   const { slug, name } = await resolve(params);
-  const matches = PRODUCTS.filter((p) => p.category === slug);
+  const matches = (await getCatalog()).products.filter((p) => p.category === slug);
 
   return (
     <>

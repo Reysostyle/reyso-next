@@ -29,6 +29,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      # No database or server on Pages: drop the admin panel and the redirect proxy.
+      - run: rm -rf "src/app/(payload)" src/proxy.ts
       - run: npm run build
       - run: node scripts/prefix-assets.mjs out
       - uses: actions/upload-pages-artifact@v3
