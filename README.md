@@ -35,7 +35,7 @@ The production build reads the catalogue from the database, so run `npm run migr
 
 ## Configuration
 
-Backend endpoints and contact handles come from environment variables (see `.env.example`). Leaving one empty keeps the old demo behaviour: orders stay in the visitor's browser, the support chat answers with a canned reply.
+Settings and contact handles come from environment variables (see `.env.example`). Without a database (as on the GitHub Pages preview) the store keeps the old demo behaviour: orders stay in the visitor's browser and the support chat answers with a canned reply.
 
 ### SMS login and customer accounts
 
@@ -43,7 +43,11 @@ With a database, customers log in with an SMS code and their profile, addresses 
 
 Codes are sent with Kavenegar once `KAVENEGAR_API_KEY` and `KAVENEGAR_OTP_TEMPLATE` are set. Until then `SMS_DEMO=1` sends nothing and accepts `12345`; never set it in production. With neither, login is refused. The GitHub Pages preview has no server and keeps the old browser-only accounts with code `12345`.
 
-Before taking real orders, `NEXT_PUBLIC_ORDER_API_URL` must point at a real backend.
+### Orders and payment
+
+With a database, orders are stored on the server (admin panel → سفارش‌ها). Prices, stock (sold-out sizes) and discount codes (admin panel → کدهای تخفیف) are checked on the server, so the browser can't change what a customer pays; if a price changed meanwhile, checkout shows the new total before paying. Each order gets a number like `RS261025-1234`, used for tracking. The admin dashboard shows today's sales, orders waiting to be handled and a sales report (7/30/90 days: daily sales, best sellers, sizes, colours, cities, discount codes, new vs returning customers).
+
+Payment goes through Zarinpal once `ZARINPAL_MERCHANT_ID` is set (`ZARINPAL_SANDBOX=1` uses Zarinpal's test gateway). An order stays "awaiting payment" until Zarinpal confirms it; the customer can pay again from their profile. Until there is a merchant ID, `PAYMENT_DEMO=1` shows a fake bank page with pay/cancel buttons; never set it in production. With neither, orders are registered without online payment (marked "manual") for payment by card transfer.
 
 ## Preview on GitHub Pages
 

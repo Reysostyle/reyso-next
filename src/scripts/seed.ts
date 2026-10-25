@@ -9,6 +9,20 @@ import { COLLECTIONS, FEATURED_PRODUCT_IDS, LESSONS, PRODUCTS } from "@/data/see
 const payload = await getPayload({ config });
 const context = { skipRevalidate: true };
 
+// The two codes the old site had in its JavaScript, now checked on the
+// server. Added to any database that has no codes yet.
+if ((await payload.count({ collection: "discount-codes" })).totalDocs === 0) {
+  await payload.create({
+    collection: "discount-codes",
+    data: { code: "REYSO10", type: "percent", value: 10, label: "۱۰٪ تخفیف", active: true },
+  });
+  await payload.create({
+    collection: "discount-codes",
+    data: { code: "WELCOME50", type: "fixed", value: 50000, label: "۵۰٬۰۰۰ تومان تخفیف", active: true },
+  });
+  payload.logger.info("Added discount codes REYSO10 and WELCOME50.");
+}
+
 const existing = await payload.count({ collection: "products" });
 if (existing.totalDocs > 0) {
   payload.logger.info(`Database already has ${existing.totalDocs} products; nothing seeded.`);

@@ -2,14 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { parseCustomerUpdate, toClientCustomer } from "@/lib/server/customer";
 import { payloadClient } from "@/lib/server/payload";
 import { readJson } from "@/lib/server/request";
-import { clearSession, readSession } from "@/lib/server/session";
-
-async function current(req: NextRequest) {
-  const id = readSession(req);
-  if (!id) return null;
-  const payload = await payloadClient();
-  return payload.findByID({ collection: "customers", id, depth: 0 }).catch(() => null);
-}
+import { clearSession, currentCustomer as current } from "@/lib/server/session";
 
 function loggedOut() {
   const res = NextResponse.json({ error: "وارد نشدی." }, { status: 401 });

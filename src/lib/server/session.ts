@@ -39,3 +39,12 @@ export function readSession(req: NextRequest): number | null {
   if (Number(expires) * 1000 < Date.now()) return null;
   return Number(id) || null;
 }
+
+/** The logged-in customer's record, or null. */
+export async function currentCustomer(req: NextRequest) {
+  const id = readSession(req);
+  if (!id) return null;
+  const { payloadClient } = await import("./payload");
+  const payload = await payloadClient();
+  return payload.findByID({ collection: "customers", id, depth: 0 }).catch(() => null);
+}

@@ -30,7 +30,15 @@ const nextConfig: NextConfig = {
   experimental: { globalNotFound: true },
   // Customer accounts (SMS login) live on the server when there's a
   // database; otherwise they stay in the browser as on the old site.
-  env: { NEXT_PUBLIC_ACCOUNTS_API: process.env.DATABASE_URL ? "1" : "" },
+  // Online payment (Zarinpal, or the demo gateway) changes the checkout
+  // button's wording.
+  env: {
+    NEXT_PUBLIC_ACCOUNTS_API: process.env.DATABASE_URL ? "1" : "",
+    NEXT_PUBLIC_ONLINE_PAYMENT:
+      process.env.DATABASE_URL && (process.env.ZARINPAL_MERCHANT_ID || process.env.PAYMENT_DEMO === "1")
+        ? "1"
+        : "",
+  },
   async redirects() {
     return OLD_PAGES.map(([source, destination]) => ({ source, destination, permanent: true }));
   },

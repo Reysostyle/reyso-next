@@ -5,8 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { AddressFields, NAME_PATTERN, focusField, useAddressForm } from "@/components/checkout/AddressFields";
 import { ProductCard } from "@/components/product/ProductCard";
-import { logOut } from "@/lib/account";
-import { REYSO_CONFIG } from "@/lib/config";
+import { ACCOUNTS_API, logOut } from "@/lib/account";
 import {
   type Address,
   CHECKOUT_PHONE_KEY,
@@ -19,7 +18,7 @@ import {
   useCustomer,
 } from "@/lib/customer";
 import { useRaw } from "@/lib/local-store";
-import { type Order, getCustomerOrders, lookupOrderRemote } from "@/lib/orders";
+import { type Order, fetchMyOrders, getCustomerOrders, payOrder } from "@/lib/orders";
 import { ORDER_STATUS_STEPS, orderStatusIndex, stepStates } from "@/lib/order-status";
 import { useCatalog } from "@/components/CatalogProvider";
 import { formatToman } from "@/lib/products";
@@ -40,8 +39,8 @@ function formatOrderDate(iso: string) {
 
 /* ---------- orders ---------- */
 
-function OrderCard({ order, liveStatus }: { order: Order; liveStatus?: string }) {
-  const status = liveStatus || order.status || "registered";
+function OrderCard({ order }: { order: Order }) {
+  const status = order.status || "registered";
   const index = orderStatusIndex(status);
   const totalSpanPercent = 75; // matches right/left 12.5% in the CSS
   const fillPercent =
@@ -66,56 +65,76 @@ function OrderCard({ order, liveStatus }: { order: Order; liveStatus?: string })
       <div className="profile-order-items">
         {order.items.map((it) => it.name + " ×" + it.qty.toLocaleString("fa-IR")).join("، ")}
       </div>
-      <div className="profile-order-status">
-        <div className="profile-order-status-line"></div>
-        <div className="profile-order-status-fill" style={{ width: fillPercent + "%" }}></div>
-        {ORDER_STATUS_STEPS.map((step, i) => (
-          <div key={step.key} className={"profile-order-step " + states[i]}>
-            <span className="profile-order-step-dot"></span>
-            <span className="profile-order-step-label">{step.label}</span>
-          </div>
-        ))}
-      </div>
+      {status === "pending_payment" ? (
+        <PayAgain orderId={order.orderId!} />
+      ) : status === "cancelled" ? (
+        <p className="profile-order-note">این سفارش لغو شده.</p>
+      ) : (
+        <div className="profile-order-status">
+          <div className="profile-order-status-line"></div>
+          <div className="profile-order-status-fill" style={{ width: fillPercent + "%" }}></div>
+          {ORDER_STATUS_STEPS.map((step, i) => (
+            <div key={step.key} className={"profile-order-step " + states[i]}>
+              <span className="profile-order-step-dot"></span>
+              <span className="profile-order-step-label">{step.label}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function PayAgain({ orderId }: { orderId: string }) {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  return (
+    <div className="profile-order-pay">
+      <p className="profile-order-note">پرداخت این سفارش انجام نشده.</p>
+      <button
+        type="button"
+        className="profile-order-pay-btn"
+        disabled={busy}
+        onClick={async () => {
+          setBusy(true);
+          setError("");
+          const res = await payOrder(orderId);
+          if (res.ok) return window.location.assign(res.data.payUrl);
+          setBusy(false);
+          setError(res.error);
+        }}
+      >
+        {busy ? "در حال اتصال به درگاه..." : "پرداخت"}
+      </button>
+      {error && <p className="auth-error">{error}</p>}
     </div>
   );
 }
 
 function OrdersPanel({ phone }: { phone: string }) {
-  // Read once on mount; orders only change on the review step.
-  const [orders] = useState(() => getCustomerOrders(phone));
-  const [live, setLive] = useState<Record<string, string>>({});
+  // Without a server the orders are this browser's own log; with one they
+  // come from the server, with their current status.
+  const [orders, setOrders] = useState<Order[] | null>(() =>
+    ACCOUNTS_API ? null : getCustomerOrders(phone),
+  );
 
-  // The local copy only knows the status at checkout time; ask the
-  // tracking endpoint for each order's current one when configured.
   useEffect(() => {
-    if (!REYSO_CONFIG.TRACK_LOOKUP_URL) return;
+    if (!ACCOUNTS_API) return;
     let cancelled = false;
-    for (const order of orders) {
-      if (!order.orderId) continue;
-      const id = order.orderId;
-      lookupOrderRemote(id)
-        .then((data) => {
-          if (!cancelled && data.found && data.status)
-            setLive((m) => ({ ...m, [id]: data.status!.production }));
-        })
-        .catch(() => {
-          // network hiccup: the locally cached status stays shown
-        });
-    }
+    fetchMyOrders().then((res) => {
+      if (!cancelled) setOrders(res.ok ? res.data.orders : []);
+    });
     return () => {
       cancelled = true;
     };
-  }, [orders]);
+  }, []);
 
+  if (!orders) return null;
   return (
     <>
       <div className="profile-orders-list" id="profile-orders-list">
         {orders.map((order) => (
-          <OrderCard
-            key={order.orderId}
-            order={order}
-            liveStatus={order.orderId ? live[order.orderId] : undefined}
-          />
+          <OrderCard key={order.orderId} order={order} />
         ))}
       </div>
       <div className="profile-empty" id="profile-orders-empty" hidden={orders.length > 0}>
