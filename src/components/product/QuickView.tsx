@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useState } from "react";
 import { useUi } from "@/components/UiProvider";
 import { addToCart } from "@/lib/cart";
-import { type Product, formatToman, getProductById, productHref } from "@/lib/products";
+import { useProductLookup } from "@/components/CatalogProvider";
+import { type Product, formatToman, productHref } from "@/lib/products";
 import { ColorOptions, DiscountBadge, QtyStepper, SizeOptions, firstAvailableSize } from "./ProductOptions";
 
 /* eslint-disable @next/next/no-img-element */
@@ -16,7 +17,7 @@ export function QuickView() {
   // Keep the last product mounted while the modal fades out.
   const [shownId, setShownId] = useState(quickViewId);
   if (quickViewId && quickViewId !== shownId) setShownId(quickViewId);
-  const product = getProductById(shownId);
+  const product = useProductLookup()(shownId);
   const close = () => openQuickView(null);
 
   return (

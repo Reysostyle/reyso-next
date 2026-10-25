@@ -1,9 +1,5 @@
 import Link from "next/link";
-import { pageMetadata } from "@/lib/seo";
-
-export const metadata = pageMetadata("404");
-
-export default function NotFound() {
+export function NotFoundContent() {
   return (
     <>
       <section className="not-found-section">

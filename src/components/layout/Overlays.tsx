@@ -6,7 +6,8 @@ import { useEffect, useRef, useState } from "react";
 import { useUi } from "@/components/UiProvider";
 import { addToCart, cartCount, useCart } from "@/lib/cart";
 import { removeFromWishlist, useWishlist } from "@/lib/wishlist";
-import { PRODUCTS, formatToman, getProductById, productHref } from "@/lib/products";
+import { useCatalog, useProductLookup } from "@/components/CatalogProvider";
+import { formatToman, productHref } from "@/lib/products";
 import { CountBadge } from "./CountBadge";
 import { LoginButton, NAV_LINKS, isActiveNav } from "./Header";
 
@@ -19,6 +20,7 @@ import { LoginButton, NAV_LINKS, isActiveNav } from "./Header";
 export function WishlistPanel() {
   const { wishlistOpen, setWishlistOpen, showCartToast } = useUi();
   const wishlist = useWishlist();
+  const getProductById = useProductLookup();
 
   return (
     <>
@@ -177,10 +179,11 @@ export function SearchOverlay() {
     return () => clearTimeout(t);
   }, [searchOpen]);
 
+  const { products } = useCatalog();
   const q = query.trim().toLowerCase();
   const matches = q
-    ? PRODUCTS.filter((p) => p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q))
-    : PRODUCTS;
+    ? products.filter((p) => p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q))
+    : products;
   const close = () => setSearchOpen(false);
 
   return (

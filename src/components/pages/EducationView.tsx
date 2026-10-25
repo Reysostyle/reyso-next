@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
-import { LESSONS, LESSON_CATEGORIES, type Lesson } from "@/lib/lessons";
+import { useCatalog } from "@/components/CatalogProvider";
+import type { Lesson } from "@/lib/lessons";
 
 /* eslint-disable @next/next/no-img-element */
 
@@ -56,6 +57,8 @@ function LessonModal({ lesson, onClose }: { lesson: Lesson | null; onClose: () =
 }
 
 export function EducationView() {
+  const { lessons: LESSONS } = useCatalog();
+  const LESSON_CATEGORIES = [...new Set(LESSONS.map((l) => l.category))];
   const [category, setCategory] = useState(ALL);
   const [lesson, setLesson] = useState<Lesson | null>(null);
   const close = useCallback(() => setLesson(null), []);

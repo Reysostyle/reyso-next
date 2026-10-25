@@ -2,7 +2,8 @@
 
 import { useEffect } from "react";
 import { createLocalStore, useLocalStore } from "@/lib/local-store";
-import { type Product, getProductById } from "@/lib/products";
+import { useProductLookup } from "@/components/CatalogProvider";
+import type { Product } from "@/lib/products";
 import { ProductCarousel } from "./ProductCarousel";
 
 const recentStore = createLocalStore<string[]>("reyso_recently_viewed", []);
@@ -18,6 +19,7 @@ export function useTrackProductView(id: string) {
 
 export function RecentlyViewed({ excludeId }: { excludeId?: string }) {
   const ids = useLocalStore(recentStore);
+  const getProductById = useProductLookup();
   const products = ids
     .filter((id) => id !== excludeId)
     .map((id) => getProductById(id))
