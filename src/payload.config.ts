@@ -49,6 +49,7 @@ export default buildConfig({
     components: {
       graphics: { Logo: "/components/admin/Logo", Icon: "/components/admin/Icon" },
       beforeDashboard: ["/components/admin/Dashboard"],
+      beforeNavLinks: ["/components/admin/NavDashboard"],
     },
   },
   i18n: { supportedLanguages: { fa }, fallbackLanguage: "fa" },

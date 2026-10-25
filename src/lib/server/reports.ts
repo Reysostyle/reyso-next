@@ -26,6 +26,11 @@ export type SalesReport = {
   todayOrders: number;
   toHandle: number;
   awaitingPayment: number;
+  /** The same figures for the period just before, for the trend arrows. */
+  previousRevenue: number;
+  previousOrders: number;
+  /** Open orders per production step: registered, sewing, ready, shipped (in range). */
+  pipeline: { status: string; count: number }[];
   daily: { key: string; label: string; revenue: number; orders: number }[];
   topProducts: Ranked;
   sizes: Ranked;
@@ -59,12 +64,15 @@ type OrderDoc = Pick<
   | "discountAmount"
 >;
 
+const PIPELINE = ["registered", "sewing", "ready", "shipped"] as const;
+
 export async function salesReport(payload: Payload, days: number): Promise<SalesReport> {
   const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
   // Placed orders: paid online, or placed for payment by arrangement.
   const placed = { paymentStatus: { in: ["paid", "manual"] }, status: { not_equals: "cancelled" } };
 
-  const [{ docs }, toHandle, awaitingPayment] = await Promise.all([
+  const before = new Date(since.getTime() - days * 24 * 60 * 60 * 1000);
+  const [{ docs }, toHandle, awaitingPayment, previous, ...pipelineCounts] = await Promise.all([
     payload.find({
       collection: "orders",
       where: { and: [placed, { createdAt: { greater_than_equal: since.toISOString() } }] },
@@ -80,6 +88,28 @@ export async function salesReport(payload: Payload, days: number): Promise<Sales
         createdAt: { greater_than_equal: since.toISOString() },
       },
     }),
+    payload.find({
+      collection: "orders",
+      where: {
+        and: [
+          placed,
+          { createdAt: { greater_than_equal: before.toISOString() } },
+          { createdAt: { less_than: since.toISOString() } },
+        ],
+      },
+      pagination: false,
+      depth: 0,
+      select: { total: true },
+    }),
+    ...PIPELINE.map((status) =>
+      payload.count({
+        collection: "orders",
+        where:
+          status === "shipped"
+            ? { status: { equals: status }, createdAt: { greater_than_equal: since.toISOString() } }
+            : { status: { equals: status } },
+      }),
+    ),
   ]);
   const orders = docs as OrderDoc[];
 
@@ -151,6 +181,9 @@ export async function salesReport(payload: Payload, days: number): Promise<Sales
     todayOrders,
     toHandle: toHandle.totalDocs,
     awaitingPayment: awaitingPayment.totalDocs,
+    previousRevenue: previous.docs.reduce((sum, o) => sum + (o.total ?? 0), 0),
+    previousOrders: previous.docs.length,
+    pipeline: PIPELINE.map((status, i) => ({ status, count: pipelineCounts[i].totalDocs })),
     daily: [...daily.entries()].map(([k, v]) => ({ key: k, ...v })),
     topProducts: rank(products, 5),
     sizes: rank(sizes, 8),
