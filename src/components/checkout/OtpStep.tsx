@@ -26,6 +26,7 @@ export function OtpStep() {
   const phone = useRaw(CHECKOUT_PHONE_KEY);
   const [digits, setDigits] = useState<string[]>(Array(LENGTH).fill(""));
   const [invalid, setInvalid] = useState(false);
+  const [error, setError] = useState("");
   const [verifying, setVerifying] = useState(false);
   const [secondsLeft, setSecondsLeft] = useState(RESEND_SECONDS);
   const [countdownKey, setCountdownKey] = useState(0);
@@ -48,11 +49,12 @@ export function OtpStep() {
   async function verify(code: string) {
     if (code.length < LENGTH || verifying || !phone) return;
     setVerifying(true);
-    const ok = await verifyOtp(phone, code);
+    const result = await verifyOtp(phone, code);
     setVerifying(false);
 
-    if (!ok) {
+    if (!result.ok) {
       setInvalid(true);
+      setError(result.error);
       setDigits(Array(LENGTH).fill(""));
       setTimeout(() => boxes.current[0]?.focus());
       return;
@@ -69,6 +71,7 @@ export function OtpStep() {
   function update(next: string[]) {
     setDigits(next);
     setInvalid(false);
+    setError("");
     // Verify as soon as every box is filled; the button stays as a fallback.
     if (next.every(Boolean)) verify(next.join(""));
   }
@@ -139,8 +142,8 @@ export function OtpStep() {
                 />
               ))}
             </fieldset>
-            <p className="auth-error" id="otp-error" hidden={!invalid}>
-              کد وارد‌شده درست نیست. دوباره امتحان کن.
+            <p className="auth-error" id="otp-error" hidden={!invalid && !error}>
+              {error || "کد وارد‌شده درست نیست. دوباره امتحان کن."}
             </p>
             <button type="submit" className="auth-submit-btn">
               تأیید کد
@@ -154,10 +157,16 @@ export function OtpStep() {
               onClick={async () => {
                 setDigits(Array(LENGTH).fill(""));
                 setInvalid(false);
+                setError("");
                 boxes.current[0]?.focus();
                 setSecondsLeft(RESEND_SECONDS);
                 setCountdownKey((k) => k + 1);
-                if (phone) await requestOtp(phone);
+                if (!phone) return;
+                const sent = await requestOtp(phone);
+                if (!sent.ok) {
+                  setError(sent.error);
+                  if (sent.retryAfter) setSecondsLeft(sent.retryAfter);
+                }
               }}
             >
               ارسال مجدد کد{" "}

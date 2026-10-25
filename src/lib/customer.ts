@@ -1,9 +1,11 @@
 "use client";
 
+import { pushCustomer } from "./account";
 import { createLocalStore, readRaw, useLocalStore, useRaw, writeRaw } from "./local-store";
 
-// Mock customer records kept in localStorage, same shape as the old
-// js/customer-store.js. Real accounts come with the backend phase.
+// Customer records kept in localStorage, same shape as the old
+// js/customer-store.js. With the server running they're a copy of the
+// account on the server, kept in step by ./account.ts.
 
 export const CHECKOUT_PHONE_KEY = "reyso_checkout_phone";
 export const CHECKOUT_VERIFIED_KEY = "reyso_checkout_verified";
@@ -23,6 +25,7 @@ export type Customer = {
   lastName?: string;
   email?: string;
   birthday?: string;
+  telegram?: string;
   addresses?: Address[];
   address?: Omit<Address, "id">; // legacy single-address shape
   shipping?: string;
@@ -42,6 +45,7 @@ export function saveMockCustomer(phone: string, data: Partial<Customer>): Custom
   const customers = { ...customersStore.get() };
   customers[phone] = { ...customers[phone], ...data };
   customersStore.set(customers);
+  if (getLoggedInPhone() === phone) pushCustomer(phone);
   return customers[phone];
 }
 

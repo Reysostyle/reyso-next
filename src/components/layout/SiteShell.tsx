@@ -7,6 +7,7 @@ import { MobileMenu, SearchOverlay, WishlistPanel } from "@/components/layout/Ov
 import { CartToast, FloatingContact, MobileTabBar } from "@/components/layout/FloatingWidgets";
 import { SiteLoader } from "@/components/layout/SiteLoader";
 import { SupportChat } from "@/components/layout/SupportChat";
+import { AccountSync } from "@/components/layout/AccountSync";
 import { QuickView } from "@/components/product/QuickView";
 import "@/styles/fonts.css";
 import "@/styles/remixicon.css";
@@ -41,6 +42,7 @@ export async function SiteShell({ children }: { children: React.ReactNode }) {
           <SupportChat />
           <QuickView />
           <CartToast />
+          <AccountSync />
         </UiProvider>
       </CatalogProvider>
     </>

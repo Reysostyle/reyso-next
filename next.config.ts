@@ -28,6 +28,9 @@ const pagesBasePath = process.env.PAGES_BASE_PATH;
 
 const nextConfig: NextConfig = {
   experimental: { globalNotFound: true },
+  // Customer accounts (SMS login) live on the server when there's a
+  // database; otherwise they stay in the browser as on the old site.
+  env: { NEXT_PUBLIC_ACCOUNTS_API: process.env.DATABASE_URL ? "1" : "" },
   async redirects() {
     return OLD_PAGES.map(([source, destination]) => ({ source, destination, permanent: true }));
   },

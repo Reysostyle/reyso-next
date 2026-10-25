@@ -70,8 +70,10 @@ export interface Config {
     products: Product;
     categories: Category;
     media: Media;
+    customers: Customer;
     lessons: Lesson;
     users: User;
+    'otp-codes': OtpCode;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -82,8 +84,10 @@ export interface Config {
     products: ProductsSelect<false> | ProductsSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    customers: CustomersSelect<false> | CustomersSelect<true>;
     lessons: LessonsSelect<false> | LessonsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
+    'otp-codes': OtpCodesSelect<false> | OtpCodesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -193,6 +197,43 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "customers".
+ */
+export interface Customer {
+  id: number;
+  phone: string;
+  firstName?: string | null;
+  lastName?: string | null;
+  email?: string | null;
+  birthday?: string | null;
+  telegram?: string | null;
+  addresses?:
+    | {
+        clientId?: string | null;
+        label?: string | null;
+        province?: string | null;
+        city?: string | null;
+        full: string;
+        postal?: string | null;
+        isDefault?: boolean | null;
+        id?: string | null;
+      }[]
+    | null;
+  wishlist?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  lastLoginAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "lessons".
  */
 export interface Lesson {
@@ -239,6 +280,21 @@ export interface User {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "otp-codes".
+ */
+export interface OtpCode {
+  id: number;
+  phone: string;
+  codeHash: string;
+  ip?: string | null;
+  expiresAt: string;
+  attempts?: number | null;
+  used?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -274,12 +330,20 @@ export interface PayloadLockedDocument {
         value: number | Media;
       } | null)
     | ({
+        relationTo: 'customers';
+        value: number | Customer;
+      } | null)
+    | ({
         relationTo: 'lessons';
         value: number | Lesson;
       } | null)
     | ({
         relationTo: 'users';
         value: number | User;
+      } | null)
+    | ({
+        relationTo: 'otp-codes';
+        value: number | OtpCode;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -385,6 +449,34 @@ export interface MediaSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "customers_select".
+ */
+export interface CustomersSelect<T extends boolean = true> {
+  phone?: T;
+  firstName?: T;
+  lastName?: T;
+  email?: T;
+  birthday?: T;
+  telegram?: T;
+  addresses?:
+    | T
+    | {
+        clientId?: T;
+        label?: T;
+        province?: T;
+        city?: T;
+        full?: T;
+        postal?: T;
+        isDefault?: T;
+        id?: T;
+      };
+  wishlist?: T;
+  lastLoginAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "lessons_select".
  */
 export interface LessonsSelect<T extends boolean = true> {
@@ -421,6 +513,20 @@ export interface UsersSelect<T extends boolean = true> {
         createdAt?: T;
         expiresAt?: T;
       };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "otp-codes_select".
+ */
+export interface OtpCodesSelect<T extends boolean = true> {
+  phone?: T;
+  codeHash?: T;
+  ip?: T;
+  expiresAt?: T;
+  attempts?: T;
+  used?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
