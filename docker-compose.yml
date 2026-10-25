@@ -1,0 +1,33 @@
+# Local trial of the full store: `docker compose up`, then
+# http://localhost:3000 (store) and http://localhost:3000/admin (panel).
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: reyso
+      POSTGRES_PASSWORD: reyso
+      POSTGRES_DB: reyso
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U reyso"]
+      interval: 2s
+      retries: 30
+
+  app:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://reyso:reyso@db:5432/reyso
+      PAYLOAD_SECRET: local-trial-secret-not-for-production
+      NEXT_PUBLIC_SITE_URL: http://localhost:3000
+    ports:
+      - "3000:3000"
+    volumes:
+      - media:/app/media
+
+volumes:
+  db-data:
+  media:

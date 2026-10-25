@@ -13,6 +13,10 @@ npm run build && npm start
 
 The production build reads the catalogue from the database, so run `npm run migrate` before `npm run build`. The first visit to `/admin` creates the first admin account.
 
+## Try it with Docker
+
+`docker compose up --build` starts PostgreSQL and the store, runs migrations, loads the starting catalogue and builds the site (a few minutes on first start). Then open http://localhost:3000 and http://localhost:3000/admin. Data and uploads persist in Docker volumes; `docker compose down -v` wipes them. The compose file uses a fixed local secret: it is for trying the store, not for production.
+
 ## Admin panel
 
 [Payload CMS](https://payloadcms.com) runs inside the same Next.js app at `/admin`, in Persian. Staff manage products, collections, images, lessons and the homepage's featured row there; any change re-renders the storefront. Uploaded images go to `MEDIA_DIR` (default `./media`), which must be persistent storage on the server.
