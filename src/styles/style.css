@@ -7011,3 +7011,60 @@ body.menu-open .floating-contact {
   top: -7px;
   right: -10px;
 }
+
+/* =====================================================
+   PAGE MOTION (src/components/layout/PageMotion.tsx)
+===================================================== */
+
+.page-motion {
+  animation: pageEnter 0.6s var(--ease-out) backwards;
+}
+
+@keyframes pageEnter {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
+.rv {
+  opacity: 0;
+  transform: translateY(28px);
+  transition:
+    opacity 0.8s var(--ease-out),
+    transform 0.8s var(--ease-out);
+  transition-delay: calc(var(--rv-i, 0) * 90ms);
+}
+
+.rv.rv-in {
+  opacity: 1;
+  transform: none;
+}
+
+/* Grid items also grow slightly as they arrive. */
+.product-grid > .rv,
+.category-grid > .rv,
+.col-grid > .rv,
+.edu-grid > .rv,
+.recent-grid > .rv {
+  transform: translateY(32px) scale(0.97);
+}
+
+.product-grid > .rv.rv-in,
+.category-grid > .rv.rv-in,
+.col-grid > .rv.rv-in,
+.edu-grid > .rv.rv-in,
+.recent-grid > .rv.rv-in {
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-motion {
+    animation: none;
+  }
+  .rv {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
